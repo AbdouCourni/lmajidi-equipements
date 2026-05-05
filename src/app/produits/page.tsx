@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import ProductCard from '../../../components/ProductCard';
 import { getAllProducts } from '../../../lib/firebase/products';
+import type { Route } from 'next';
 
 interface ProductsPageProps {
   searchParams: Promise<{
@@ -110,7 +111,7 @@ export default async function ProductsPage({
 
               {/* ALL PRODUCTS */}
               <Link
-                href="/produits"
+                href={'/produits' as Route}
                 className={`px-4 py-3 rounded-xl text-sm font-medium transition ${
                   !category
                     ? 'bg-blue-600 text-white'
@@ -127,7 +128,7 @@ export default async function ProductsPage({
                 return (
                   <Link
                     key={cat}
-                    href={`/produits?category=${encodeURIComponent(cat)}`}
+                    href={`/produits?category=${encodeURIComponent(cat)}` as Route}
                     className={`px-4 py-3 rounded-xl text-sm font-medium capitalize transition ${
                       category === normalizedCat
                         ? 'bg-blue-600 text-white'
@@ -158,7 +159,7 @@ export default async function ProductsPage({
               </p>
 
               <Link
-                href="/produits"
+                href={'/produits' as Route}
                 className="btn-primary"
               >
                 Voir tous les produits
