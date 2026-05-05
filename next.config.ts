@@ -1,7 +1,16 @@
+// next.config.ts
+
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    domains: [
+      'i.imgur.com',
+      'images.unsplash.com',
+      'firebasestorage.googleapis.com',
+    ],
+  },
+  reactStrictMode: true,
 };
 
 export default nextConfig;
