@@ -2,11 +2,13 @@
 
 'use client';
 
+import WhatsAppIcon from './WhatsAppIcon';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import Image from 'next/image';
+import { MessageCircle } from 'lucide-react';
 
 
 const navItems: {
@@ -95,10 +97,10 @@ export default function Header() {
               rel="noopener noreferrer"
               className="hidden md:flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition"
             >
-              <span>💬</span>
-              <span>WhatsApp</span>
-            </a>
-
+<WhatsAppIcon className="w-4 h-4" />
+          <span>WhatsApp</span>            </a>
+           
+              
             {/* MOBILE BUTTON */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}

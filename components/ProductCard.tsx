@@ -11,6 +11,7 @@ import {
   getProductStockStatus,
   type Product,
 } from '../types/product';
+import WhatsAppIcon from './WhatsAppIcon';
 
 interface ProductCardProps {
   product: Product;
@@ -25,6 +26,21 @@ export default function ProductCard({ product }: ProductCardProps) {
     .filter(v => v.color)
     .map(v => v.color)
     .slice(0, 3);
+
+  // Format WhatsApp message with product details
+  const formatWhatsAppMessage = () => {
+    const message = `*Nouvelle demande de devis*%0A%0A` +
+      `*Produit:* ${product.name}%0A` +
+      `*Marque:* ${product.brand || 'Non spécifiée'}%0A` +
+      `*Prix:* ${displayPrice}%0A` +
+      `*Référence:* ${product.id}%0A%0A` +
+      `*Description:*%0A${product.description.substring(0, 100)}%0A%0A` +
+      `*Catégorie:* ${product.category}%0A` +
+      `*Sous-catégorie:* ${product.subCategory}%0A%0A` +
+      `Je souhaite recevoir plus d'informations et un devis détaillé pour ce produit.`;
+    
+    return message;
+  };
 
   return (
     <div className="relative group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border border-gray-100">
@@ -114,12 +130,13 @@ export default function ProductCard({ product }: ProductCardProps) {
           </Link>
 
           <a
-            href={`https://wa.me/212625652015?text=Bonjour%2C%20je%20suis%20int%C3%A9ress%C3%A9%20par%20${encodeURIComponent(product.name)}`}
+            href={`https://wa.me/212625652015?text=${formatWhatsAppMessage()}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-green-500 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-green-600 transition flex items-center justify-center"
+            className="bg-green-500 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-green-600 transition flex items-center justify-center gap-1.5"
           >
-            💬
+            <WhatsAppIcon className="w-4 h-4" />
+            <span>Devis</span>
           </a>
         </div>
       </div>
