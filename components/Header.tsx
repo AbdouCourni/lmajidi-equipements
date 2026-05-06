@@ -6,6 +6,8 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import Image from 'next/image';
+
 
 const navItems: {
   href: Route;
@@ -43,9 +45,14 @@ export default function Header() {
             className="flex items-center gap-3"
           >
             <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-sm">
-                EP
-              </span>
+                <Image
+    src="/h-logo48.png"
+    alt="Europmat"
+    width={180}
+    height={50}
+    priority
+    className="h-10 w-auto object-contain"
+  />
             </div>
 
             <div>

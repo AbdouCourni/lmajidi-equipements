@@ -18,7 +18,7 @@ export default function ProductDetailClient({
       : 'Sur devis';
 
   return (
-    <div className="container-custom py-10">
+    <div className="container-custom py-10 bg-white">
 
       {/* BREADCRUMB */}
       <div className="text-sm text-gray-500 mb-6 flex gap-2">
