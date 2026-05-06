@@ -190,17 +190,7 @@ export default function Footer() {
             <p className="text-sm text-gray-400">
               © {currentYear} Ste Europmat. Tous droits réservés.
             </p>
-            <div className="flex gap-6 text-sm text-gray-400">
-              <Link href="/mentions-legales" className="hover:text-blue-400 transition-colors">
-                Mentions légales
-              </Link>
-              <Link href="/confidentialite" className="hover:text-blue-400 transition-colors">
-                Confidentialité
-              </Link>
-              <Link href="/cgv" className="hover:text-blue-400 transition-colors">
-                CGV
-              </Link>
-            </div>
+           
           </div>
         </div>
       </div>
