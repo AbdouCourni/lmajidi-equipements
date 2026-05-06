@@ -16,7 +16,7 @@ export default async function ProductDetailPage({
 
   if (!product) {
     return (
-      <div className="container-custom py-8 text-center">
+      <div className="container-custom py-8 bg-white text-center">
         <h1 className="text-2xl font-bold mb-4">Produit non trouvé</h1>
         <Link href={'/produits' as Route} className="btn-primary">
           Voir tous les produits

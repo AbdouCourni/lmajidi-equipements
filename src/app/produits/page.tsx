@@ -55,7 +55,7 @@ export default async function ProductsPage({
   );
 
   return (
-    <div className="container-custom py-8">
+    <div className="container-custom py-8 bg-white">
 
       {/* PAGE HEADER */}
       <div className="mb-10">

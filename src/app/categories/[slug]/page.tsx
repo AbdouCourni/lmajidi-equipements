@@ -34,7 +34,7 @@ export default async function CategoryPage({
   const categoryIcon = categoryIcons[slug] || '📦';
 
   return (
-    <div className="container-custom py-8">
+    <div className="container-custom py-8 bg-white">
 
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-8 mb-8">
