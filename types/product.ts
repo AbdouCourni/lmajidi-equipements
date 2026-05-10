@@ -1,80 +1,126 @@
 // src/types/product.ts
-export interface ProductVariant {
-  sku: string;
-  color?: string;
-  type?: string;
-  price?: number;  // Optional - some variants may not have price
-  stockStatus: 'in_stock' | 'low_stock' | 'out_of_stock';
-  image?: string;
-  page?: number;
+
+export type ProductStockStatus =
+  | 'in_stock'
+  | 'low_stock'
+  | 'out_of_stock';
+
+/* =========================================================
+   PRODUCT IMAGE
+========================================================= */
+
+export interface ProductImage {
+  id: string;
+  url: string;
+  publicId: string;
+  isPrimary: boolean;
 }
+
+/* =========================================================
+   PRODUCT SPECIFICATIONS
+========================================================= */
+
+export interface ProductSpecifications {
+  dimensions?: string;
+  weight?: string;
+ power?: string;
+  voltage?: string;
+  refrigerant?: string;
+
+  [key: string]: string | undefined;
+}
+
+/* =========================================================
+   PRODUCT
+========================================================= */
 
 export interface Product {
   id: string;
-  name: string;
-  price: number | null;
-  currency: string;
-  category: string;
-  subCategory: string;
-  brand?: string;
-  description: string;
-  variants: ProductVariant[];
-  primaryImage?: string;
-  gallery?: string[];
-  isOnPromotion?: boolean;
-  keySpecs?: string[];
-  specifications?: Record<string, string>;
-  page?: number;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
 
+  name: string;
+  description: string;
+
+  price: number | null;
+
+  currency: 'MAD' | 'EUR' | 'USD';
+
+  category: string;
+
+  subCategory?: string;
+
+  brand?: string;
+
+  images: ProductImage[];
+
+  stockStatus?: ProductStockStatus;
+
+  isOnPromotion?: boolean;
+
+  keySpecs?: string[];
+
+  specifications?: ProductSpecifications;
+
+  page?: number;
+
+  createdAt?: string;
+
+  updatedAt?: string;
+}
 // Helper function to get display price
 export function getProductDisplayPrice(product: Product): string {
-  // Check if product has direct price
-  if (product.price) {
+
+  // Product has price
+  if (product.price && product.price > 0) {
     return `${product.price.toLocaleString('fr-FR')} ${product.currency}`;
   }
-  
-  // Check variants for prices
-  if (product.variants && product.variants.length > 0) {
-    const prices = product.variants
-      .map(v => v.price)
-      .filter((p): p is number => p !== undefined && p !== null && p > 0);
-    
-    if (prices.length > 0) {
-      const minPrice = Math.min(...prices);
-      const maxPrice = Math.max(...prices);
-      
-      if (minPrice === maxPrice) {
-        return `${minPrice.toLocaleString('fr-FR')} ${product.currency}`;
-      } else {
-        return `${minPrice.toLocaleString('fr-FR')} - ${maxPrice.toLocaleString('fr-FR')} ${product.currency}`;
-      }
-    }
-  }
-  
-  // If no price found
+
+  // No price
   return 'Sur devis';
 }
 
 // Helper function to get product badge
 export function getProductBadge(product: Product): string | null {
-  if (product.isOnPromotion) return 'PROMO';
-  if (product.price === null && (!product.variants || product.variants.length === 0)) return 'SUR DEVIS';
+
+  if (product.isOnPromotion) {
+    return 'PROMO';
+  }
+
+  if (product.price === null || product.price <= 0) {
+    return 'SUR DEVIS';
+  }
+
   return null;
 }
 
 // Helper function to get stock status
-export function getProductStockStatus(product: Product): { label: string; color: string } {
-  if (!product.variants || product.variants.length === 0) {
-    return { label: 'Disponible', color: 'bg-green-100 text-green-700' };
+export function getProductStockStatus(
+  product: Product
+): { label: string; color: string } {
+
+  switch (product.stockStatus) {
+
+    case 'in_stock':
+      return {
+        label: 'En stock',
+        color: 'bg-green-100 text-green-700'
+      };
+
+    case 'low_stock':
+      return {
+        label: 'Stock limité',
+        color: 'bg-orange-100 text-orange-700'
+      };
+
+    case 'out_of_stock':
+      return {
+        label: 'Sur commande',
+        color: 'bg-blue-100 text-blue-700'
+      };
+
+    default:
+      return {
+        label: 'Disponible',
+        color: 'bg-green-100 text-green-700'
+      };
   }
-  
-  const hasStock = product.variants.some(v => v.stockStatus === 'in_stock');
-  const hasLowStock = product.variants.some(v => v.stockStatus === 'low_stock');
-  
-  if (hasStock) return { label: 'En stock', color: 'bg-green-100 text-green-700' };
-  if (hasLowStock) return { label: 'Stock limité', color: 'bg-orange-100 text-orange-700' };
-  return { label: 'Sur commande', color: 'bg-blue-100 text-blue-700' };
 }

@@ -1,44 +1,111 @@
 // src/app/produits/[id]/page.tsx
 
 import Link from 'next/link';
-import type { Route } from 'next';
-import { getProductById, getAllProducts } from '../../../../lib/firebase/products';
+
+import type {
+  Route,
+} from 'next';
+
+import {
+  getAllProducts,
+  getProductById,
+} from '../../../../lib/firebase/products';
+
 import ProductDetailClient from './ProductDetailClient';
+
+interface ProductDetailPageProps {
+
+  params: Promise<{
+    id: string;
+  }>;
+}
 
 export default async function ProductDetailPage({
   params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+}: ProductDetailPageProps) {
 
-  const product = await getProductById(id);
+  // IMPORTANT
+  const { id } =
+    await params;
 
-  if (!product) {
+  console.log(
+    'PRODUCT ID:',
+    id
+  );
+
+  if (!id) {
+
     return (
-      <div className="container-custom py-8 bg-white text-center">
-        <h1 className="text-2xl font-bold mb-4">Produit non trouvé</h1>
-        <Link href={'/produits' as Route} className="btn-primary">
-          Voir tous les produits
-        </Link>
+
+      <div className="container-custom py-16 text-center">
+
+        <h1 className="text-3xl font-bold">
+
+          Produit introuvable
+
+        </h1>
+
       </div>
     );
   }
 
-  // 🔥 GET RELATED PRODUCTS
-  const allProducts = await getAllProducts();
+  const product =
+    await getProductById(id);
 
-  const relatedProducts = allProducts
-    .filter(
-      (p) =>
-        p.id !== product.id &&
-        p.category?.toLowerCase() === product.category?.toLowerCase()
-    )
-    .slice(0, 4);
+  if (!product) {
+
+    return (
+
+      <div className="container-custom py-16 text-center">
+
+        <h1 className="text-3xl font-bold mb-4">
+
+          Produit non trouvé
+
+        </h1>
+
+        <Link
+          href={
+            '/produits' as Route
+          }
+          className="btn-primary"
+        >
+
+          Voir les produits
+
+        </Link>
+
+      </div>
+    );
+  }
+
+  const allProducts =
+    await getAllProducts();
+
+  const relatedProducts =
+    allProducts
+
+      .filter(
+        p =>
+
+          p.id !== product.id &&
+
+          p.category
+            ?.toLowerCase() ===
+
+          product.category
+            ?.toLowerCase()
+      )
+
+      .slice(0, 4);
 
   return (
+
     <ProductDetailClient
       product={product}
+      relatedProducts={
+        relatedProducts
+      }
     />
   );
 }

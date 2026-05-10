@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
       'i.imgur.com',
       'images.unsplash.com',
       'firebasestorage.googleapis.com',
+      'res.cloudinary.com',
     ],
   },
   reactStrictMode: true,

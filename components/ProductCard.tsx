@@ -4,142 +4,225 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+
 import type { Route } from 'next';
+
 import {
   getProductBadge,
   getProductDisplayPrice,
   getProductStockStatus,
   type Product,
 } from '../types/product';
+
 import WhatsAppIcon from './WhatsAppIcon';
 
 interface ProductCardProps {
   product: Product;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
-  const displayPrice = getProductDisplayPrice(product);
-  const badge = getProductBadge(product);
-  const stockStatus = getProductStockStatus(product);
+export default function ProductCard({
+  product,
+}: ProductCardProps) {
 
-  const variantColors = product.variants
-    .filter(v => v.color)
-    .map(v => v.color)
-    .slice(0, 3);
+  const displayPrice =
+    getProductDisplayPrice(product);
 
-  // Format WhatsApp message with product details
+  const badge =
+    getProductBadge(product);
+
+  const stockStatus =
+    getProductStockStatus(product);
+
+  /* =========================================================
+     PRIMARY IMAGE
+  ========================================================= */
+
+  const primaryImage =
+    product.images?.find(
+      image => image.isPrimary
+    )?.url ||
+    product.images?.[0]?.url;
+
+  /* =========================================================
+     WHATSAPP MESSAGE
+  ========================================================= */
+
   const formatWhatsAppMessage = () => {
-    const message = `*Nouvelle demande de devis*%0A%0A` +
+
+    const message =
+      `*Nouvelle demande de devis*%0A%0A` +
+
       `*Produit:* ${product.name}%0A` +
-      `*Marque:* ${product.brand || 'Non spécifiée'}%0A` +
+
+      `*Marque:* ${
+        product.brand ||
+        'Non spécifiée'
+      }%0A` +
+
       `*Prix:* ${displayPrice}%0A` +
-      `*Référence:* ${product.id}%0A%0A` +
-      `*Description:*%0A${product.description.substring(0, 100)}%0A%0A` +
-      `*Catégorie:* ${product.category}%0A` +
-      `*Sous-catégorie:* ${product.subCategory}%0A%0A` +
+
+      `*Référence:* ${
+        product.id
+      }%0A%0A` +
+
+      `*Description:*%0A${
+        product.description.substring(
+          0,
+          100
+        )
+      }%0A%0A` +
+
+      `*Catégorie:* ${
+        product.category
+      }%0A` +
+
+      `*Sous-catégorie:* ${
+        product.subCategory ||
+        'Non spécifiée'
+      }%0A%0A` +
+
       `Je souhaite recevoir plus d'informations et un devis détaillé pour ce produit.`;
-    
+
     return message;
   };
 
   return (
-    <div className="relative group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border border-gray-100">
 
-      {/* FULL CLICKABLE LINK */}
+    <div className="relative group bg-white rounded-2xl overflow-hidden border border-steel shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+
+      {/* FULL LINK */}
       <Link
         href={`/produits/${product.id}` as Route}
         className="absolute inset-0 z-10"
       />
 
       {/* IMAGE */}
-      <div className="relative h-52 bg-gradient-to-br from-gray-50 to-gray-100">
-        {product.primaryImage ? (
+      <div className="relative h-56 bg-gradient-to-br from-beige-warm to-steel overflow-hidden">
+
+        {primaryImage ? (
+
           <Image
-            src={product.primaryImage}
+            src={primaryImage}
             alt={product.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
+
         ) : (
+
           <div className="absolute inset-0 flex items-center justify-center text-5xl">
+
             🏪
+
           </div>
         )}
 
+        {/* OVERLAY */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition" />
 
         {/* BADGE */}
         {badge && (
+
           <div className="absolute top-3 left-3 z-20">
-            <span className={`text-xs font-bold px-2 py-1 rounded-lg shadow ${
-              badge === 'PROMO'
-                ? 'bg-red-500 text-white'
-                : badge === 'SUR DEVIS'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-700 text-white'
-            }`}>
+
+            <span
+              className={`text-xs font-semibold px-3 py-1 rounded-full shadow-sm ${
+                badge === 'PROMO'
+                  ? 'bg-red-premium text-white'
+                  : badge === 'SUR DEVIS'
+                  ? 'bg-navy-main text-white'
+                  : 'bg-charcoal text-white'
+              }`}
+            >
+
               {badge}
+
             </span>
+
           </div>
         )}
 
         {/* STOCK */}
         <div className="absolute top-3 right-3 z-20">
-          <span className={`text-xs px-2 py-1 rounded-full bg-white/90 backdrop-blur shadow ${stockStatus.color}`}>
+
+          <span
+            className={`text-xs px-3 py-1 rounded-full bg-white/90 backdrop-blur shadow-sm ${stockStatus.color}`}
+          >
+
             {stockStatus.label}
+
           </span>
+
         </div>
+
       </div>
 
       {/* CONTENT */}
       <div className="p-5 flex flex-col relative z-20">
 
-        <div className="text-xs text-gray-400 mb-1 uppercase tracking-wide">
+        {/* BRAND */}
+        <div className="text-xs uppercase tracking-wider text-steel-dark mb-1">
+
           {product.brand || 'Produit'}
+
         </div>
 
-        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition text-sm leading-snug">
+        {/* NAME */}
+        <h3 className="font-semibold text-charcoal mb-2 line-clamp-2 group-hover:text-navy-main transition text-sm leading-snug">
+
           {product.name}
+
         </h3>
 
-        {variantColors.length > 0 && (
-          <div className="text-xs text-gray-500 mb-2">
-            <span className="font-medium">Couleurs:</span>{' '}
-            {variantColors.join(', ')}
-          </div>
-        )}
+        {/* PRICE */}
+        <div className="mb-3">
 
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xl font-bold text-blue-600">
+          <span className="text-xl font-bold text-navy-main">
+
             {displayPrice}
+
           </span>
+
         </div>
 
-        <p className="text-xs text-gray-500 line-clamp-2 mb-4 flex-grow">
+        {/* DESCRIPTION */}
+        <p className="text-xs text-steel-dark line-clamp-2 mb-5 flex-grow">
+
           {product.description}
+
         </p>
 
-        {/* CTA BUTTONS */}
+        {/* CTA */}
         <div className="flex gap-2 relative z-30">
-          
+
+          {/* DETAILS */}
           <Link
             href={`/produits/${product.id}` as Route}
-            className="flex-1 text-center bg-gray-900 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition"
+            className="flex-1 text-center bg-charcoal text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-navy-main transition"
           >
+
             Voir détails
+
           </Link>
 
+          {/* WHATSAPP */}
           <a
             href={`https://wa.me/212625652015?text=${formatWhatsAppMessage()}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-green-500 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-green-600 transition flex items-center justify-center gap-1.5"
+            className="bg-green-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-green-600 transition flex items-center justify-center gap-2"
           >
+
             <WhatsAppIcon className="w-4 h-4" />
+
             <span>Devis</span>
+
           </a>
+
         </div>
+
       </div>
+
     </div>
   );
 }

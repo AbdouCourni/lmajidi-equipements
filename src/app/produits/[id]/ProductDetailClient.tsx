@@ -3,170 +3,451 @@
 'use client';
 
 import Image from 'next/image';
+
 import Link from 'next/link';
-import type { Route } from 'next';
-import { Product } from '../../../../types/product';
+
+import type {
+  Route,
+} from 'next';
+
+import type {
+  Product,
+} from '../../../../types/product';
+
+import ProductCard from '../../../../components/ProductCard';
+
+interface ProductDetailClientProps {
+  product: Product;
+
+  relatedProducts: Product[];
+}
 
 export default function ProductDetailClient({
   product,
-}: {
-  product: Product;
-}) {
+  relatedProducts,
+}: ProductDetailClientProps) {
+
+  /* =========================================================
+     PRIMARY IMAGE
+  ========================================================= */
+
+  const primaryImage =
+
+    product.images?.find(
+      image => image.isPrimary
+    )?.url ||
+
+    product.images?.[0]?.url ||
+
+    null;
+
+  /* =========================================================
+     PRICE
+  ========================================================= */
+
   const displayPrice =
+
     product.price !== null
-      ? `${product.price} ${product.currency}`
+
+      ? `${product.price.toLocaleString(
+          'fr-MA'
+        )} ${product.currency}`
+
       : 'Sur devis';
 
+  /* =========================================================
+     WHATSAPP
+  ========================================================= */
+
+  const whatsappMessage =
+    encodeURIComponent(
+
+      `Bonjour, je souhaite recevoir un devis pour :
+
+Produit : ${product.name}
+Référence : ${product.id}
+Catégorie : ${product.category}
+
+Merci.`
+    );
+
   return (
-    <div className="container-custom py-10 bg-white">
 
-      {/* BREADCRUMB */}
-      <div className="text-sm text-gray-500 mb-6 flex gap-2">
+    <div className="bg-white">
 
-        <Link href={'/' as Route}>
-          Accueil
-        </Link>
+      {/* =====================================================
+         BREADCRUMB
+      ===================================================== */}
 
-        <span>›</span>
+      <div className="border-b border-steel">
 
-        <Link href={'/produits' as Route}>
-          Produits
-        </Link>
+        <div className="container-custom py-4">
 
-        <span>›</span>
+          <div className="flex items-center gap-2 text-sm text-steel-dark">
 
-        <span className="text-gray-900 font-medium">
-          {product.name}
-        </span>
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-10 items-start">
-
-        {/* IMAGE */}
-        <div className="relative h-[350px] md:h-[500px] rounded-2xl overflow-hidden shadow-xl">
-
-          {product.primaryImage ? (
-            <Image
-              src={product.primaryImage}
-              alt={product.name}
-              fill
-              priority
-              className="object-cover"
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full bg-gray-100 text-6xl">
-              🏪
-            </div>
-          )}
-
-        </div>
-
-        {/* INFO */}
-        <div>
-
-          {/* BRAND */}
-          <p className="text-sm text-gray-400 uppercase mb-2">
-            {product.brand || 'Produit'}
-          </p>
-
-          {/* TITLE */}
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            {product.name}
-          </h1>
-
-          {/* PRICE */}
-          <div className="text-2xl font-bold text-blue-600 mb-6">
-            {displayPrice}
-          </div>
-
-          {/* DESCRIPTION */}
-          <p className="text-gray-600 leading-relaxed mb-6">
-            {product.description}
-          </p>
-
-          {/* VARIANTS */}
-          {product.variants.length > 0 && (
-            <div className="mb-6">
-
-              <h3 className="font-semibold text-gray-900 mb-2">
-                Variantes disponibles :
-              </h3>
-
-              <div className="flex flex-wrap gap-2">
-
-                {product.variants.map((v, i) => (
-                  <span
-                    key={i}
-                    className="px-3 py-1 bg-gray-100 rounded-full text-sm"
-                  >
-                    {v.color || v.sku}
-                  </span>
-                ))}
-
-              </div>
-            </div>
-          )}
-
-          {/* CTA */}
-          <div className="flex flex-col sm:flex-row gap-4">
-
-            <a
-              href={`https://wa.me/212625652015?text=Bonjour%2C%20je%20souhaite%20un%20devis%20pour%20${encodeURIComponent(product.name)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary text-center"
+            <Link
+              href={'/' as Route}
+              className="hover:text-navy-main transition"
             >
-              💬 Demander un devis
-            </a>
+              Accueil
+            </Link>
+
+            <span>/</span>
 
             <Link
               href={'/produits' as Route}
-              className="btn-secondary text-center"
+              className="hover:text-navy-main transition"
             >
-              ← Retour catalogue
+              Produits
             </Link>
 
-          </div>
+            <span>/</span>
 
-          {/* TRUST */}
-          <div className="mt-8 text-sm text-gray-500 flex flex-wrap gap-6">
-            <span>✔ Livraison rapide</span>
-            <span>✔ Garantie</span>
-            <span>✔ Support 24/7</span>
+            <span className="text-charcoal font-medium">
+
+              {product.name}
+
+            </span>
+
           </div>
 
         </div>
+
       </div>
 
-      {/* SPECIFICATIONS */}
-      {product.specifications &&
-        Object.keys(product.specifications).length > 0 && (
-          <div className="mt-12">
+      {/* =====================================================
+         PRODUCT
+      ===================================================== */}
 
-            <h2 className="text-xl font-bold mb-4 text-gray-900">
-              Spécifications
-            </h2>
+      <section className="container-custom py-10">
 
-            <div className="bg-white rounded-xl border border-gray-100 divide-y">
+        <div className="grid lg:grid-cols-2 gap-10 items-start">
 
-              {Object.entries(product.specifications).map(([key, value]) => (
-                <div
-                  key={key}
-                  className="flex justify-between p-4 text-sm"
-                >
-                  <span className="text-gray-500">
-                    {key}
-                  </span>
+          {/* =================================================
+             IMAGES
+          ================================================= */}
 
-                  <span className="font-medium text-gray-900">
-                    {value}
-                  </span>
+          <div>
+
+            {/* MAIN IMAGE */}
+            <div className="relative aspect-square rounded-3xl overflow-hidden border border-steel bg-beige-warm">
+
+              {primaryImage ? (
+
+                <Image
+                  src={primaryImage}
+                  alt={product.name}
+                  fill
+                  priority
+                  className="object-cover"
+                />
+
+              ) : (
+
+                <div className="absolute inset-0 flex items-center justify-center text-7xl">
+
+                  🏪
+
                 </div>
-              ))}
+              )}
 
             </div>
+
+            {/* GALLERY */}
+            {product.images &&
+              product.images.length >
+                1 && (
+
+              <div className="grid grid-cols-4 gap-4 mt-4">
+
+                {product.images.map(
+                  image => (
+
+                    <div
+                      key={image.id}
+                      className="relative aspect-square rounded-2xl overflow-hidden border border-steel bg-beige-warm"
+                    >
+
+                      <Image
+                        src={image.url}
+                        alt={product.name}
+                        fill
+                        className="object-cover"
+                      />
+
+                    </div>
+                  )
+                )}
+
+              </div>
+            )}
+
+          </div>
+
+          {/* =================================================
+             INFO
+          ================================================= */}
+
+          <div>
+
+            {/* BRAND */}
+            <p className="text-sm uppercase tracking-wider text-steel-dark mb-3">
+
+              {product.brand ||
+                'Produit'}
+
+            </p>
+
+            {/* TITLE */}
+            <h1 className="text-3xl md:text-4xl font-bold text-charcoal leading-tight mb-5">
+
+              {product.name}
+
+            </h1>
+
+            {/* CATEGORY */}
+            <div className="mb-5">
+
+              <span className="badge-beige capitalize">
+
+                {product.category?.replace(
+                  /-/g,
+                  ' '
+                )}
+
+              </span>
+
+            </div>
+
+            {/* PRICE */}
+            <div className="text-4xl font-bold text-navy-main mb-8">
+
+              {displayPrice}
+
+            </div>
+
+            {/* DESCRIPTION */}
+            <div className="mb-8">
+
+              <h2 className="text-lg font-semibold text-charcoal mb-3">
+
+                Description
+
+              </h2>
+
+              <p className="text-steel-dark leading-relaxed whitespace-pre-line">
+
+                {product.description}
+
+              </p>
+
+            </div>
+
+            {/* KEY SPECS */}
+            {product.keySpecs &&
+              product.keySpecs.length >
+                0 && (
+
+              <div className="mb-8">
+
+                <h2 className="text-lg font-semibold text-charcoal mb-4">
+
+                  Points clés
+
+                </h2>
+
+                <div className="space-y-3">
+
+                  {product.keySpecs.map(
+                    (
+                      spec,
+                      index
+                    ) => (
+
+                      <div
+                        key={index}
+                        className="flex items-start gap-3"
+                      >
+
+                        <div className="w-2 h-2 rounded-full bg-navy-main mt-2"></div>
+
+                        <p className="text-steel-dark">
+
+                          {spec}
+
+                        </p>
+
+                      </div>
+                    )
+                  )}
+
+                </div>
+
+              </div>
+            )}
+
+            {/* CTA */}
+            <div className="flex flex-col sm:flex-row gap-4">
+
+              <a
+                href={`https://wa.me/212625652015?text=${whatsappMessage}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary text-center"
+              >
+
+                💬 Demander un devis
+
+              </a>
+
+              <Link
+                href={'/produits' as Route}
+                className="btn-secondary text-center"
+              >
+
+                ← Retour catalogue
+
+              </Link>
+
+            </div>
+
+            {/* TRUST */}
+            <div className="mt-8 flex flex-wrap gap-6 text-sm text-steel-dark">
+
+              <span>
+                ✔ Livraison rapide
+              </span>
+
+              <span>
+                ✔ Garantie qualité
+              </span>
+
+              <span>
+                ✔ Support professionnel
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* =====================================================
+           SPECIFICATIONS
+        ===================================================== */}
+
+        {product.specifications &&
+          Object.keys(
+            product.specifications
+          ).length > 0 && (
+
+          <div className="mt-16">
+
+            <h2 className="text-2xl font-bold text-charcoal mb-6">
+
+              Spécifications techniques
+
+            </h2>
+
+            <div className="rounded-2xl border border-steel overflow-hidden">
+
+              {Object.entries(
+                product.specifications
+              )
+
+                .filter(
+                  ([_, value]) =>
+                    value
+                )
+
+                .map(
+                  (
+                    [key, value]
+                  ) => (
+
+                    <div
+                      key={key}
+                      className="grid grid-cols-2 border-b border-steel last:border-0"
+                    >
+
+                      <div className="bg-beige-warm/60 px-4 py-3 font-medium text-charcoal capitalize">
+
+                        {key.replace(
+                          /_/g,
+                          ' '
+                        )}
+
+                      </div>
+
+                      <div className="px-4 py-3 text-steel-dark">
+
+                        {String(
+                          value
+                        )}
+
+                      </div>
+
+                    </div>
+                  )
+                )}
+
+            </div>
+
           </div>
         )}
+
+      </section>
+
+      {/* =====================================================
+         RELATED PRODUCTS
+      ===================================================== */}
+
+      {relatedProducts.length >
+        0 && (
+
+        <section className="py-16 bg-beige-warm/40 border-t border-steel">
+
+          <div className="container-custom">
+
+            <div className="mb-8">
+
+              <h2 className="text-3xl font-bold text-charcoal">
+
+                Produits similaires
+
+              </h2>
+
+              <p className="text-steel-dark mt-2">
+
+                Découvrez d'autres équipements similaires
+
+              </p>
+
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+
+              {relatedProducts.map(
+                relatedProduct => (
+
+                  <ProductCard
+                    key={
+                      relatedProduct.id
+                    }
+                    product={
+                      relatedProduct
+                    }
+                  />
+                )
+              )}
+
+            </div>
+
+          </div>
+
+        </section>
+      )}
+
     </div>
   );
 }

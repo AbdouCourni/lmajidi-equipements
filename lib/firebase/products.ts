@@ -8,36 +8,83 @@ let productsCache: Product[] | null = null;
 let productsCacheTime = 0;
 const CACHE_DURATION = 5 * 60 * 1000;
 
-function convertToProduct(doc: DocumentSnapshot): Product {
+function convertToProduct(
+  doc: DocumentSnapshot
+): Product {
+
   const data = doc.data() || {};
 
   return {
+
     id: doc.id,
+
     name: data.name || '',
-    price: data.price ?? null,
-    currency: data.currency || 'MAD',
-    category: data.category || '',
-    subCategory: data.subCategory || '',
-    brand: data.brand || '',
-    description: data.description || '',
-    variants: (data.variants || []).map((variant: Record<string, unknown>) => ({
-      sku: String(variant.sku || ''),
-      color: typeof variant.color === 'string' ? variant.color : undefined,
-      type: typeof variant.type === 'string' ? variant.type : undefined,
-      price: typeof variant.price === 'number' ? variant.price : undefined,
-      stockStatus:
-        variant.stockStatus === 'low_stock' || variant.stockStatus === 'out_of_stock'
-          ? variant.stockStatus
-          : 'in_stock',
-      image: typeof variant.image === 'string' ? variant.image : undefined,
-      page: typeof variant.page === 'number' ? variant.page : undefined,
-    })),
-    primaryImage: data.primaryImage || '',
-    gallery: data.gallery || [],
-    isOnPromotion: data.isOnPromotion || false,
-    keySpecs: data.keySpecs || [],
-    specifications: data.specifications || {},
-    page: data.page,
+
+    description:
+      data.description || '',
+
+    price:
+      data.price ?? null,
+
+    currency:
+      data.currency || 'MAD',
+
+    category:
+      data.category || '',
+
+    subCategory:
+      data.subCategory || '',
+
+    brand:
+      data.brand || '',
+
+    images:
+      (data.images || []).map(
+        (image: Record<string, unknown>) => ({
+
+          id:
+            String(
+              image.id || ''
+            ),
+
+          url:
+            String(
+              image.url || ''
+            ),
+
+          publicId:
+            String(
+              image.publicId || ''
+            ),
+
+          isPrimary:
+            Boolean(
+              image.isPrimary
+            ),
+        })
+      ),
+
+    stockStatus:
+      data.stockStatus ||
+      'in_stock',
+
+    isOnPromotion:
+      data.isOnPromotion || false,
+
+    keySpecs:
+      data.keySpecs || [],
+
+    specifications:
+      data.specifications || {},
+
+    page:
+      data.page,
+
+    createdAt:
+      data.createdAt,
+
+    updatedAt:
+      data.updatedAt,
   };
 }
 
@@ -64,12 +111,34 @@ export async function getAllProducts(): Promise<Product[]> {
   }
 }
 
-export async function getProductById(id: string): Promise<Product | null> {
+export async function getProductById(
+  id: string
+): Promise<Product | null> {
+  console.log(`Fetching product with ID: ${id}`);
+
+  if (!id) {
+    return null;
+  }
+
   try {
-    const snapshot = await adminDb.collection('products').doc(id).get();
-    return snapshot.exists ? convertToProduct(snapshot) : null;
+
+    const snapshot =
+      await adminDb
+        .collection('products')
+        .doc(id)
+        .get();
+
+    return snapshot.exists
+      ? convertToProduct(snapshot)
+      : null;
+
   } catch (error) {
-    console.error(`Error fetching product ${id}:`, error);
+
+    console.error(
+      `Error fetching product ${id}:`,
+      error
+    );
+
     return null;
   }
 }
@@ -98,6 +167,20 @@ export async function searchProducts(searchTerm: string): Promise<Product[]> {
       product.category,
       product.subCategory,
     ].some((value) => value?.toLowerCase().includes(term)),
+  );
+}
+export function getPrimaryImage(
+  product: Product
+) {
+
+  return (
+    product.images?.find(
+      image => image.isPrimary
+    )?.url ||
+
+    product.images?.[0]?.url ||
+
+    null
   );
 }
 
