@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
       'images.unsplash.com',
       'firebasestorage.googleapis.com',
       'res.cloudinary.com',
+      'via.placeholder.com'
     ],
   },
   reactStrictMode: true,

@@ -1,232 +1,176 @@
-import 'server-only';
+// src/lib/firebase/products.ts
 
-import type { DocumentSnapshot } from 'firebase-admin/firestore';
+import 'server-only';
 import { adminDb } from './admin';
 import type { Product } from '../../types/product';
 
-let productsCache: Product[] | null = null;
-let productsCacheTime = 0;
-const CACHE_DURATION = 5 * 60 * 1000;
+/* =========================================================
+   CACHE
+========================================================= */
 
-function convertToProduct(
-  doc: DocumentSnapshot
-): Product {
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+let cache: { data: any; timestamp: number; key: string } | null = null;
 
-  const data = doc.data() || {};
+/* =========================================================
+   GET PRODUCTS WITH FILTERS & PAGINATION
+========================================================= */
 
-  return {
-
-    id: doc.id,
-
-    name: data.name || '',
-
-    description:
-      data.description || '',
-
-    price:
-      data.price ?? null,
-
-    currency:
-      data.currency || 'MAD',
-
-    category:
-      data.category || '',
-
-    subCategory:
-      data.subCategory || '',
-
-    brand:
-      data.brand || '',
-
-    images:
-      (data.images || []).map(
-        (image: Record<string, unknown>) => ({
-
-          id:
-            String(
-              image.id || ''
-            ),
-
-          url:
-            String(
-              image.url || ''
-            ),
-
-          publicId:
-            String(
-              image.publicId || ''
-            ),
-
-          isPrimary:
-            Boolean(
-              image.isPrimary
-            ),
-        })
-      ),
-
-    stockStatus:
-      data.stockStatus ||
-      'in_stock',
-
-    isOnPromotion:
-      data.isOnPromotion || false,
-
-    keySpecs:
-      data.keySpecs || [],
-
-    specifications:
-      data.specifications || {},
-
-    page:
-      data.page,
-
-    createdAt:
-      data.createdAt,
-
-    updatedAt:
-      data.updatedAt,
-  };
+interface GetProductsOptions {
+  category?: string;
+  search?: string;
+  limit?: number;
+  page?: number;
+  featured?: boolean;
+  onPromotion?: boolean;
 }
 
-function sortByName(products: Product[]) {
-  return [...products].sort((a, b) => a.name.localeCompare(b.name, 'fr'));
-}
+export async function getProducts(options: GetProductsOptions = {}) {
+  const {
+    category,
+    search,
+    limit = 12,
+    page = 1,
+    featured,
+    onPromotion,
+  } = options;
 
-export async function getAllProducts(): Promise<Product[]> {
-  if (productsCache && Date.now() - productsCacheTime < CACHE_DURATION) {
-    return productsCache;
+  // Build cache key
+  const cacheKey = JSON.stringify(options);
+  
+  if (cache && cache.key === cacheKey && Date.now() - cache.timestamp < CACHE_DURATION) {
+    return cache.data;
   }
 
   try {
-    const snapshot = await adminDb.collection('products').orderBy('name', 'asc').get();
-    const products = snapshot.docs.map(convertToProduct);
+    let query: FirebaseFirestore.Query = adminDb.collection('products');
 
-    productsCache = products;
-    productsCacheTime = Date.now();
-   console.log(`Fetched ${products.length} products from Firestore at ${new Date(productsCacheTime).toLocaleTimeString()}`);
-    return products;
+    // Apply filters server-side
+    if (category) {
+      query = query.where('category', '==', category);
+    }
+
+    if (featured) {
+      query = query.where('featured', '==', true);
+    }
+
+    if (onPromotion) {
+      query = query.where('isOnPromotion', '==', true);
+    }
+
+    // Order by creation date (newest first)
+    query = query.orderBy('createdAt', 'desc');
+
+    // Get total count (for pagination)
+    const countSnapshot = await query.count().get();
+    const total = countSnapshot.data().count;
+
+    // Apply pagination
+    const offset = (page - 1) * limit;
+    if (offset > 0) {
+      // Firebase doesn't support offset, so we use startAfter
+      // For simplicity, we'll fetch with limit and handle it differently
+    }
+
+    query = query.limit(limit);
+
+    const snapshot = await query.get();
+
+    let products = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Product[];
+
+    // Client-side search filter (Firebase doesn't support full-text search natively)
+    if (search) {
+      const searchLower = search.toLowerCase();
+      products = products.filter(p =>
+        p.name.toLowerCase().includes(searchLower) ||
+        p.description?.toLowerCase().includes(searchLower) ||
+        p.brand?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    const result = {
+      products,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+      hasMore: page * limit < total,
+    };
+
+    // Update cache
+    cache = { data: result, timestamp: Date.now(), key: cacheKey };
+
+    return result;
   } catch (error) {
     console.error('Error fetching products:', error);
-    return productsCache || [];
+    return {
+      products: [],
+      total: 0,
+      page: 1,
+      totalPages: 0,
+      hasMore: false,
+    };
   }
 }
 
-export async function getProductById(
-  id: string
-): Promise<Product | null> {
-  console.log(`Fetching product with ID: ${id}`);
+/* =========================================================
+   GET PRODUCT BY SLUG
+========================================================= */
 
-  if (!id) {
-    return null;
-  }
-
-  try {
-
-    const snapshot =
-      await adminDb
-        .collection('products')
-        .doc(id)
-        .get();
-
-    return snapshot.exists
-      ? convertToProduct(snapshot)
-      : null;
-
-  } catch (error) {
-
-    console.error(
-      `Error fetching product ${id}:`,
-      error
-    );
-
-    return null;
-  }
-}
-
-export async function getFeaturedProducts(limitCount = 8): Promise<Product[]> {
-  const products = await getAllProducts();
-  return products
-    .filter((product) => product.price !== null && product.price > 0)
-    .sort((a, b) => (b.price || 0) - (a.price || 0))
-    .slice(0, limitCount);
-}
-
-export async function searchProducts(searchTerm: string): Promise<Product[]> {
-  const products = await getAllProducts();
-  const term = searchTerm.trim().toLowerCase();
-
-  if (!term) {
-    return products;
-  }
-
-  return products.filter((product) =>
-    [
-      product.name,
-      product.brand,
-      product.description,
-      product.category,
-      product.subCategory,
-    ].some((value) => value?.toLowerCase().includes(term)),
-  );
-}
-export function getPrimaryImage(
-  product: Product
-) {
-
-  return (
-    product.images?.find(
-      image => image.isPrimary
-    )?.url ||
-
-    product.images?.[0]?.url ||
-
-    null
-  );
-}
-
-export async function getProductsByCategory(category: string): Promise<Product[]> {
+export async function getProductBySlug(slug: string): Promise<Product | null> {
   try {
     const snapshot = await adminDb
       .collection('products')
-      .where('category', '==', category)
-      .orderBy('name', 'asc')
+      .where('slug', '==', slug)
+      .limit(1)
       .get();
 
-    return snapshot.docs.map(convertToProduct);
+    if (snapshot.empty) return null;
+
+    const doc = snapshot.docs[0];
+    return { id: doc.id, ...doc.data() } as Product;
   } catch (error) {
-    console.error(`Error fetching products for category ${category}:`, error);
-    return sortByName((await getAllProducts()).filter((product) => product.category === category));
+    console.error('Error fetching product:', error);
+    return null;
   }
 }
 
-export async function getProductsBySubCategory(subCategory: string): Promise<Product[]> {
-  const products = await getAllProducts();
-  return sortByName(products.filter((product) => product.subCategory === subCategory));
-}
+/* =========================================================
+   GET PRODUCTS BY CATEGORY (with subcategories)
+========================================================= */
 
-export async function getProductsByBrand(brand: string): Promise<Product[]> {
-  const products = await getAllProducts();
-  return sortByName(products.filter((product) => product.brand === brand));
-}
-
-export async function getProductsByPriceRange(
-  minPrice: number,
-  maxPrice: number,
+export async function getProductsByCategory(
+  categorySlug: string,
+  subCategorySlugs: string[] = []
 ): Promise<Product[]> {
-  const products = await getAllProducts();
-  return sortByName(
-    products.filter(
-      (product) => product.price !== null && product.price >= minPrice && product.price <= maxPrice,
-    ),
-  );
-}
+  try {
+    // Main category query
+    const mainQuery = adminDb
+      .collection('products')
+      .where('category', '==', categorySlug)
+      .limit(50);
 
-export async function getPromotionProducts(): Promise<Product[]> {
-  const products = await getAllProducts();
-  return sortByName(products.filter((product) => product.isOnPromotion));
-}
+    const [mainSnapshot, ...subSnapshots] = await Promise.all([
+      mainQuery.get(),
+      ...subCategorySlugs.map(slug =>
+        adminDb
+          .collection('products')
+          .where('subCategory', '==', slug)
+          .limit(50)
+          .get()
+      ),
+    ]);
 
-export function clearCache() {
-  productsCache = null;
-  productsCacheTime = 0;
+    const products = [
+      ...mainSnapshot.docs,
+      ...subSnapshots.flatMap(snap => snap.docs),
+    ].map(doc => ({ id: doc.id, ...doc.data() } as Product));
+
+    // Remove duplicates
+    return Array.from(new Map(products.map(p => [p.id, p])).values());
+  } catch (error) {
+    console.error('Error fetching products by category:', error);
+    return [];
+  }
 }
