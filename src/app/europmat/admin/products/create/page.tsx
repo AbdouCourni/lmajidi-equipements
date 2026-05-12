@@ -1,279 +1,421 @@
 // src/app/europmat/admin/products/create/page.tsx
+
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { collection, addDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db } from '../../../../../../lib/firebase/config';
+import { ImageUpload } from '../../../../../../components/dashboard/ProductImageUpload';
 import Link from 'next/link';
+import type { Route } from 'next';
+import type { ProductImage, ProductStockStatus } from '../../../../../../types/product';
 
 const CATEGORIES = [
-  'Refrigeration',
-  'Pizza Equipment',
-  'Bakery Equipment',
-  'Fryers',
-  'Grills',
-  'Shawarma Machines',
-  'Pastry Displays',
-  'Stainless Steel Equipment',
-  'Ice Cream Machines',
-  'Restaurant Furniture',
+  'refrigeration',
+  'cooking',
+  'bakery',
+  'preparation',
+  'snack-equipment',
+  'furniture',
+];
+
+const STOCK_STATUSES: { value: ProductStockStatus; label: string }[] = [
+  { value: 'in_stock', label: 'En stock' },
+  { value: 'low_stock', label: 'Stock limité' },
+  { value: 'out_of_stock', label: 'Sur commande' },
 ];
 
 export default function CreateProductPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
   const [formData, setFormData] = useState({
     name: '',
-    slug: '',
-    category: '',
     description: '',
     price: '',
-    featured: false,
-    images: [''],
+    currency: 'MAD' as 'MAD' | 'EUR' | 'USD',
+    category: '',
+    subCategory: '',
+    brand: '',
+    stockStatus: 'in_stock' as ProductStockStatus,
+    isOnPromotion: false,
+    keySpecs: [''],
+    specifications: {
+      dimensions: '',
+      weight: '',
+      power: '',
+      voltage: '',
+      refrigerant: '',
+    },
   });
 
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
-  };
+  const [images, setImages] = useState<ProductImage[]>([]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  /* =========================================================
+     HANDLERS
+  ========================================================= */
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value, type } = e.target;
-    
-    if (name === 'name') {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value,
-        slug: generateSlug(value),
-      }));
-    } else if (type === 'checkbox') {
-      setFormData(prev => ({
-        ...prev,
-        [name]: (e.target as HTMLInputElement).checked,
-      }));
+
+    if (type === 'checkbox') {
+      setFormData(prev => ({ ...prev, [name]: (e.target as HTMLInputElement).checked }));
     } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value,
-      }));
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
 
-  const handleImageChange = (index: number, value: string) => {
-    const newImages = [...formData.images];
-    newImages[index] = value;
-    setFormData(prev => ({ ...prev, images: newImages }));
-  };
-
-  const addImageField = () => {
-    setFormData(prev => ({ ...prev, images: [...prev.images, ''] }));
-  };
-
-  const removeImageField = (index: number) => {
+  const handleSpecChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index),
+      specifications: { ...prev.specifications, [field]: value },
     }));
   };
 
+  const handleKeySpecChange = (index: number, value: string) => {
+    const newSpecs = [...formData.keySpecs];
+    newSpecs[index] = value;
+    setFormData(prev => ({ ...prev, keySpecs: newSpecs }));
+  };
+
+  const addKeySpec = () => {
+    setFormData(prev => ({ ...prev, keySpecs: [...prev.keySpecs, ''] }));
+  };
+
+  const removeKeySpec = (index: number) => {
+    if (formData.keySpecs.length <= 1) return;
+    setFormData(prev => ({
+      ...prev,
+      keySpecs: prev.keySpecs.filter((_, i) => i !== index),
+    }));
+  };
+
+  /* =========================================================
+     SUBMIT
+  ========================================================= */
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setError('');
+
+    if (images.length === 0) {
+      setError('Please upload at least one image');
+      return;
+    }
+
+    if (!formData.name || !formData.category) {
+      setError('Name and category are required');
+      return;
+    }
 
     try {
+      setLoading(true);
+
       const productData = {
-        name: formData.name,
-        slug: formData.slug,
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        price: formData.price ? parseFloat(formData.price) : null,
+        currency: formData.currency,
         category: formData.category,
-        description: formData.description,
-        price: parseFloat(formData.price) || 0,
-        featured: formData.featured,
-        images: formData.images.filter(img => img.trim() !== ''),
+        subCategory: formData.subCategory.trim() || '',
+        brand: formData.brand.trim() || '',
+        images,
+        stockStatus: formData.stockStatus,
+        isOnPromotion: formData.isOnPromotion,
+        keySpecs: formData.keySpecs.filter(s => s.trim()),
+        specifications: Object.fromEntries(
+          Object.entries(formData.specifications).filter(([_, v]) => v.trim())
+        ),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
       await addDoc(collection(db, 'products'), productData);
-      router.push('/europmat/admin/products');
-    } catch (error) {
-      console.error('Error creating product:', error);
-      alert('Failed to create product');
+      router.push('/europmat/admin/products' as Route);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to create product');
     } finally {
       setLoading(false);
     }
   };
 
+  /* =========================================================
+     UI
+  ========================================================= */
+
   return (
-    <div>
-      {/* Header */}
+    <div className="animate-fade-in max-w-4xl mx-auto">
+      {/* HEADER */}
       <div className="flex items-center gap-4 mb-8">
         <Link
-          href="/europmat/admin/products"
-          className="p-2 hover:bg-gray-100 rounded-lg transition"
+          href={'/europmat/admin/products' as Route}
+          className="p-2 hover:bg-beige-warm rounded-lg transition"
         >
-          <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-charcoal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold text-navy-900">Create Product</h1>
-          <p className="text-gray-600 mt-2">Add a new product to your catalog</p>
+          <h1 className="text-2xl font-bold text-charcoal">Create Product</h1>
+          <p className="text-sm text-steel-dark mt-1">Add a new product to the catalog</p>
         </div>
       </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Product Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Product Name *
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-navy-500 focus:border-transparent outline-none"
-              placeholder="e.g., Professional Pizza Oven"
-            />
-          </div>
+      {/* ERROR */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          {error}
+        </div>
+      )}
 
-          {/* Slug */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Slug (auto-generated)
-            </label>
-            <input
-              type="text"
-              name="slug"
-              value={formData.slug}
-              readOnly
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 text-gray-500"
-            />
-          </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* BASIC INFORMATION */}
+        <div className="card-dashboard p-6">
+          <h2 className="text-lg font-semibold text-charcoal mb-4">Basic Information</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2">
+              <label className="label">Product Name *</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                className="input-field"
+                placeholder="e.g., Vitrine Réfrigérée 3 Portes"
+              />
+            </div>
 
-          {/* Category */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Category *
-            </label>
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-navy-500 focus:border-transparent outline-none"
-            >
-              <option value="">Select a category</option>
-              {CATEGORIES.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-          </div>
+            <div className="md:col-span-2">
+              <label className="label">Description</label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                rows={4}
+                className="input-field"
+                placeholder="Product description..."
+              />
+            </div>
 
-          {/* Price */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Price (DH)
-            </label>
-            <input
-              type="number"
-              name="price"
-              value={formData.price}
-              onChange={handleChange}
-              step="0.01"
-              min="0"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-navy-500 focus:border-transparent outline-none"
-              placeholder="0.00"
-            />
-          </div>
+            <div>
+              <label className="label">Category *</label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                required
+                className="input-field"
+              >
+                <option value="">Select category</option>
+                {CATEGORIES.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
 
-          {/* Featured */}
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              name="featured"
-              checked={formData.featured}
-              onChange={handleChange}
-              className="w-5 h-5 text-navy-600 rounded border-gray-300 focus:ring-navy-500"
-            />
-            <label className="text-sm font-medium text-gray-700">
-              Featured Product
-            </label>
+            <div>
+              <label className="label">Sub Category</label>
+              <input
+                type="text"
+                name="subCategory"
+                value={formData.subCategory}
+                onChange={handleChange}
+                className="input-field"
+                placeholder="e.g., vitrines-refrigerees"
+              />
+            </div>
+
+            <div>
+              <label className="label">Brand</label>
+              <input
+                type="text"
+                name="brand"
+                value={formData.brand}
+                onChange={handleChange}
+                className="input-field"
+                placeholder="e.g., Comerssa"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="label">Price</label>
+                <input
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  step="0.01"
+                  min="0"
+                  className="input-field"
+                  placeholder="Leave empty for 'Sur devis'"
+                />
+              </div>
+              <div>
+                <label className="label">Currency</label>
+                <select
+                  name="currency"
+                  value={formData.currency}
+                  onChange={handleChange}
+                  className="input-field"
+                >
+                  <option value="MAD">MAD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="USD">USD</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="label">Stock Status</label>
+              <select
+                name="stockStatus"
+                value={formData.stockStatus}
+                onChange={handleChange}
+                className="input-field"
+              >
+                {STOCK_STATUSES.map(s => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-3 pt-6">
+              <input
+                type="checkbox"
+                name="isOnPromotion"
+                checked={formData.isOnPromotion}
+                onChange={handleChange}
+                className="w-4 h-4 rounded border-steel-dark text-red-premium focus:ring-red-premium"
+              />
+              <label className="text-sm font-medium text-charcoal">
+                On Promotion
+              </label>
+            </div>
           </div>
         </div>
 
-        {/* Description */}
-        <div className="mt-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Description
-          </label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            rows={5}
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-navy-500 focus:border-transparent outline-none"
-            placeholder="Product description..."
+        {/* IMAGES */}
+        <div className="card-dashboard p-6">
+          <h2 className="text-lg font-semibold text-charcoal mb-4">
+            Images ({images.length}/10)
+          </h2>
+          <ImageUpload
+            images={images}
+            onChange={setImages}
+            maxImages={10}
           />
         </div>
 
-        {/* Images */}
-        <div className="mt-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Images (URLs)
-          </label>
-          <div className="space-y-3">
-            {formData.images.map((image, index) => (
+        {/* KEY SPECS */}
+        <div className="card-dashboard p-6">
+          <h2 className="text-lg font-semibold text-charcoal mb-4">Key Specifications</h2>
+          <div className="space-y-2">
+            {formData.keySpecs.map((spec, index) => (
               <div key={index} className="flex gap-2">
                 <input
-                  type="url"
-                  value={image}
-                  onChange={(e) => handleImageChange(index, e.target.value)}
-                  className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-navy-500 focus:border-transparent outline-none"
-                  placeholder="https://example.com/image.jpg"
+                  type="text"
+                  value={spec}
+                  onChange={(e) => handleKeySpecChange(index, e.target.value)}
+                  className="input-field flex-1"
+                  placeholder="e.g., 1000L capacité"
                 />
-                {formData.images.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeImageField(index)}
-                    className="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition"
-                  >
-                    ✕
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => removeKeySpec(index)}
+                  className="px-3 text-red-premium hover:bg-red-50 rounded-lg transition"
+                >
+                  ✕
+                </button>
               </div>
             ))}
             <button
               type="button"
-              onClick={addImageField}
-              className="text-sm text-navy-600 hover:underline flex items-center gap-1"
+              onClick={addKeySpec}
+              className="text-sm text-navy-accent hover:underline flex items-center gap-1 mt-2"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-              Add another image URL
+              Add specification
             </button>
           </div>
         </div>
 
-        {/* Submit */}
-        <div className="mt-8 flex gap-4">
+        {/* TECHNICAL SPECIFICATIONS */}
+        <div className="card-dashboard p-6">
+          <h2 className="text-lg font-semibold text-charcoal mb-4">Technical Specifications</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="label">Dimensions</label>
+              <input
+                type="text"
+                value={formData.specifications.dimensions}
+                onChange={(e) => handleSpecChange('dimensions', e.target.value)}
+                className="input-field"
+                placeholder="e.g., 1800 x 750 x 2000 mm"
+              />
+            </div>
+            <div>
+              <label className="label">Weight</label>
+              <input
+                type="text"
+                value={formData.specifications.weight}
+                onChange={(e) => handleSpecChange('weight', e.target.value)}
+                className="input-field"
+                placeholder="e.g., 180 kg"
+              />
+            </div>
+            <div>
+              <label className="label">Power</label>
+              <input
+                type="text"
+                value={formData.specifications.power}
+                onChange={(e) => handleSpecChange('power', e.target.value)}
+                className="input-field"
+                placeholder="e.g., 400 W"
+              />
+            </div>
+            <div>
+              <label className="label">Voltage</label>
+              <input
+                type="text"
+                value={formData.specifications.voltage}
+                onChange={(e) => handleSpecChange('voltage', e.target.value)}
+                className="input-field"
+                placeholder="e.g., 220V/50Hz"
+              />
+            </div>
+            <div>
+              <label className="label">Refrigerant</label>
+              <input
+                type="text"
+                value={formData.specifications.refrigerant}
+                onChange={(e) => handleSpecChange('refrigerant', e.target.value)}
+                className="input-field"
+                placeholder="e.g., R290"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* SUBMIT */}
+        <div className="flex items-center gap-3">
           <button
             type="submit"
             disabled={loading}
-            className="bg-navy-900 text-white px-8 py-3 rounded-lg font-semibold hover:bg-navy-800 transition disabled:opacity-50 flex items-center gap-2"
+            className="btn-primary"
           >
             {loading ? (
               <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                <div className="spinner w-5 h-5" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }}></div>
                 Creating...
               </>
             ) : (
@@ -281,8 +423,8 @@ export default function CreateProductPage() {
             )}
           </button>
           <Link
-            href="/europmat/admin/products"
-            className="px-8 py-3 rounded-lg border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition"
+            href={'/europmat/admin/products' as Route}
+            className="btn-secondary"
           >
             Cancel
           </Link>

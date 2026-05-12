@@ -6,8 +6,9 @@ import type { Route } from 'next';
 import { notFound } from 'next/navigation';
 
 import ProductCard from '../../../../components/ProductCard';
-import { getAllProducts } from '../../../../lib/firebase/products';
+import { getProducts } from '../../../../lib/firebase/products';
 import { getAllCategories } from '../../../../lib/firebase/categories';
+import { Product } from '../../../../types/product';
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
@@ -16,10 +17,12 @@ interface CategoryPageProps {
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug } = await params;
 
-  const [allProducts, allCategories] = await Promise.all([
-    getAllProducts(),
-    getAllCategories(),
-  ]);
+  const [productsData, allCategories] = await Promise.all([
+  getProducts({ limit: 1000 }),
+  getAllCategories(),
+]);
+
+const allProducts = productsData.products; 
 
   const category = allCategories.find(cat => cat.slug === slug);
 
@@ -51,12 +54,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   // If MAIN category: show products from this category AND all its subcategories
   // If SUB category: show ONLY products from this subcategory
-  const products = category.level === 'main'
-    ? allProducts.filter(product =>
+const products = category.level === 'main'
+    ? allProducts.filter((product: { category: string; subCategory: string; }) =>
         product.category === category.slug ||
         (product.subCategory && subCategorySlugs.includes(product.subCategory))
       )
-    : allProducts.filter(product =>
+    : allProducts.filter((product: { subCategory: string; category: string; }) =>
         product.subCategory === category.slug ||
         product.category === category.slug
       );
@@ -66,7 +69,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   ========================================================= */
 
   function getSubCategoryProductCount(subCategorySlug: string): number {
-    return allProducts.filter(p => p.subCategory === subCategorySlug).length;
+    return allProducts.filter((p: { subCategory: string; }) => p.subCategory === subCategorySlug).length;
   }
 
   return (
@@ -288,7 +291,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {products.map(product => (
+              {products.map((product: Product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>

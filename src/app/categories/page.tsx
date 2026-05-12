@@ -1,15 +1,18 @@
 // src/app/categories/page.tsx
 
 import CategoryCard from '../../../components/CategoryCard';
-import { getAllProducts } from '../../../lib/firebase/products';
+import { getProducts } from '../../../lib/firebase/products';
 import { getMainCategories, getAllCategories } from '../../../lib/firebase/categories';
 
 export default async function CategoriesPage() {
-  const [categories, allCategories, products] = await Promise.all([
+  const [categories, allCategories, productsData] = await Promise.all([
     getMainCategories(),
     getAllCategories(),
-    getAllProducts(),
+    getProducts({ limit: 1000 }), // Fetch up to 1000 for counting
   ]);
+
+  // FIX: Destructure the products array from the returned object
+  const products = productsData.products;
 
   /* FIXED: Match by slug instead of name */
   function getProductCount(categoryId: string, categorySlug: string): number {
@@ -17,7 +20,7 @@ export default async function CategoriesPage() {
       .filter(cat => cat.parentId === categoryId && cat.level === 'sub')
       .map(cat => cat.slug);
 
-    return products.filter(product =>
+    return products.filter((product: { category: string; subCategory: string; }) =>
       product.category === categorySlug ||
       (product.subCategory && subCategorySlugs.includes(product.subCategory))
     ).length;
@@ -56,7 +59,7 @@ export default async function CategoriesPage() {
               <CategoryCard
                 key={category.id}
                 category={category}
-                productCount={getProductCount(category.id, category.slug)} // ← Pass slug
+                productCount={getProductCount(category.id, category.slug)}
               />
             ))}
           </div>

@@ -1,24 +1,22 @@
 // src/components/FeaturedProducts.tsx
 
-import { getFeaturedProducts } from '../lib/firebase/products';
-import FeaturedProductsClient from './FeaturedProductsClient';
+import { getProducts } from '../lib/firebase/products';
+import { Product } from '../types/product';
+import ProductCard from './ProductCard';
 
 export default async function FeaturedProducts() {
-  try {
-    const products = await getFeaturedProducts(8);
+  const { products } = await getProducts({ 
+    featured: true, 
+    limit: 8 
+  });
 
-    return (
-      <FeaturedProductsClient products={products} />
-    );
-  } catch (error) {
-    console.error('Error loading products:', error);
+  if (products.length === 0) return null;
 
-    return (
-      <div className="text-center py-12">
-        <p className="text-red-500">
-          Erreur lors du chargement des produits
-        </p>
-      </div>
-    );
-  }
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+      {products.map((product: Product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
 }

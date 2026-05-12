@@ -9,7 +9,7 @@ import type { Product } from '../../types/product';
 ========================================================= */
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-let cache: { data: any; timestamp: number; key: string } | null = null;
+const cache = new Map<string, { data: any; timestamp: number }>(); // ← CHANGED
 
 /* =========================================================
    GET PRODUCTS WITH FILTERS & PAGINATION
@@ -37,39 +37,27 @@ export async function getProducts(options: GetProductsOptions = {}) {
   // Build cache key
   const cacheKey = JSON.stringify(options);
   
-  if (cache && cache.key === cacheKey && Date.now() - cache.timestamp < CACHE_DURATION) {
-    return cache.data;
+  // ← FIXED: Use Map.get() instead of single cache
+  const cached = cache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data;
   }
 
   try {
     let query: FirebaseFirestore.Query = adminDb.collection('products');
 
-    // Apply filters server-side
     if (category) {
       query = query.where('category', '==', category);
-    }
-
-    if (featured) {
-      query = query.where('featured', '==', true);
     }
 
     if (onPromotion) {
       query = query.where('isOnPromotion', '==', true);
     }
 
-    // Order by creation date (newest first)
     query = query.orderBy('createdAt', 'desc');
 
-    // Get total count (for pagination)
     const countSnapshot = await query.count().get();
     const total = countSnapshot.data().count;
-
-    // Apply pagination
-    const offset = (page - 1) * limit;
-    if (offset > 0) {
-      // Firebase doesn't support offset, so we use startAfter
-      // For simplicity, we'll fetch with limit and handle it differently
-    }
 
     query = query.limit(limit);
 
@@ -80,7 +68,6 @@ export async function getProducts(options: GetProductsOptions = {}) {
       ...doc.data(),
     })) as Product[];
 
-    // Client-side search filter (Firebase doesn't support full-text search natively)
     if (search) {
       const searchLower = search.toLowerCase();
       products = products.filter(p =>
@@ -98,8 +85,8 @@ export async function getProducts(options: GetProductsOptions = {}) {
       hasMore: page * limit < total,
     };
 
-    // Update cache
-    cache = { data: result, timestamp: Date.now(), key: cacheKey };
+    // ← FIXED: Use Map.set()
+    cache.set(cacheKey, { data: result, timestamp: Date.now() });
 
     return result;
   } catch (error) {
@@ -111,6 +98,52 @@ export async function getProducts(options: GetProductsOptions = {}) {
       totalPages: 0,
       hasMore: false,
     };
+  }
+}
+/* =========================================================
+   GET RELATED PRODUCTS
+========================================================= */
+
+export async function getRelatedProducts(
+  productId: string,
+  category: string,
+  limit: number = 4
+): Promise<Product[]> {
+  try {
+    const snapshot = await adminDb
+      .collection('products')
+      .where('category', '==', category)
+      .limit(limit + 1) // Fetch one extra in case the current product is included
+      .get();
+
+    const products = snapshot.docs
+      .map(doc => ({ id: doc.id, ...doc.data() } as Product))
+      .filter(p => p.id !== productId)
+      .slice(0, limit);
+
+    return products;
+  } catch (error) {
+    console.error('Error fetching related products:', error);
+    return [];
+  }
+}
+/* =========================================================
+   GET PRODUCT BY ID
+========================================================= */
+
+export async function getProductById(id: string): Promise<Product | null> {
+  try {
+    const doc = await adminDb
+      .collection('products')
+      .doc(id)
+      .get();
+
+    if (!doc.exists) return null;
+
+    return { id: doc.id, ...doc.data() } as Product;
+  } catch (error) {
+    console.error('Error fetching product by ID:', error);
+    return null;
   }
 }
 

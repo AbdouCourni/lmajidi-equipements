@@ -210,7 +210,7 @@ export default function ProductCard({
 
           {/* WHATSAPP */}
           <a
-            href={`https://wa.me/212625652015?text=${formatWhatsAppMessage()}`}
+            href={`https://wa.me/212654063922?text=${formatWhatsAppMessage()}`}
             target="_blank"
             rel="noopener noreferrer"
             className="bg-green-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-green-600 transition flex items-center justify-center gap-2"

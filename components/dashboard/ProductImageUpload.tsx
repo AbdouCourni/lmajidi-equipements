@@ -1,4 +1,4 @@
-  // src/components/dashboard/image-upload.tsx
+  // src/components/dashboard/ProductImageUpload.tsx
 
   'use client';
 

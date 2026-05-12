@@ -44,20 +44,20 @@ export default function HomePage() {
       </div>
 
       {/* Featured Products */}
-      <section className="py-16 bg-gray-100">
-        <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Nos meilleures ventes
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Découvrez les équipements les plus populaires auprès de nos clients
-            </p>
-          </div>
-          
-          <FeaturedProducts />
-        </div>
-      </section>
+     <section className="py-12 md:py-16 lg:py-20 bg-beige-warm">
+  <div className="container-custom">
+    <div className="text-center mb-8 md:mb-12">
+      <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-charcoal mb-3 md:mb-4">
+        Nos meilleures ventes
+      </h2>
+      <p className="text-steel-dark text-sm md:text-base max-w-2xl mx-auto px-4">
+        Découvrez les équipements les plus populaires auprès de nos clients
+      </p>
+    </div>
+    
+    <FeaturedProducts />
+  </div>
+</section>
     </>
   );
 }

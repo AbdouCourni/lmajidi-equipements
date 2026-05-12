@@ -46,17 +46,17 @@ export default function Header() {
             href={'/' as Route}
             className="flex items-center gap-3"
           >
-            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-sm">
-                <Image
-    src="/h-logo48.png"
+          <div className="flex items-center">
+  <Image
+    src="/logoText.png"
     alt="Europmat"
     width={180}
-    height={50}
+    height={36}
     priority
-    className="h-10 w-auto object-contain"
+    className="h-9 w-auto object-contain"
   />
-            </div>
-
+</div>
+{/* 
             <div>
               <p className="font-bold text-gray-900 text-lg leading-none">
                 Europmat
@@ -65,7 +65,7 @@ export default function Header() {
               <p className="text-xs text-gray-500">
                 Équipements Professionnels
               </p>
-            </div>
+            </div> */}
           </Link>
 
           {/* DESKTOP NAV */}
