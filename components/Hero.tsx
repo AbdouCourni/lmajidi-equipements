@@ -15,19 +15,19 @@ const SLIDES = [
     category: 'refrigeration',
   },
   {
-    image: 'https://i.imgur.com/pNjzq0f.png',
+    image: 'https://res.cloudinary.com/dfsmkq5mw/image/upload/v1778428813/bakery_em8bxi.png',
     title: 'Matériel de Boulangerie',
     subtitle: 'Qualité professionnelle',
     category: 'bakery',
   },
   {
-    image: 'https://i.imgur.com/wwszw5P.png',
+    image: 'https://res.cloudinary.com/dfsmkq5mw/image/upload/v1778428627/pizza_dhvbxs.png',
     title: 'Cuisine & Snack',
     subtitle: 'Tout l\'équipement nécessaire',
     category: 'cooking',
   },
    {
-    image: 'https://i.imgur.com/0haoRh9.png',
+    image: 'https://res.cloudinary.com/dfsmkq5mw/image/upload/v1778435221/europmat/categories/nrfsf354k7n2emeqymz9.png',
     title: 'Froid Commercial',
     subtitle: 'Vitrines & chambres froides',
     category: 'refrigeration',
