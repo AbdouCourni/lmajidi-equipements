@@ -5,16 +5,19 @@ import { getAllCategories } from '../../lib/firebase/categories';
 export default async function sitemap() {
   const baseUrl = 'https://europmat.com';
   
-  const [products, categories] = await Promise.all([
+  const [productsData, categories] = await Promise.all([
     getProducts({ limit: 150 }),
     getAllCategories(),
   ]);
 
+  // FIX: Destructure products array
+  const products = productsData.products;
+
   const staticPages = [
-    { url: baseUrl, lastModified: new Date(), changeFrequency: 'weekly', priority: 1 },
-    { url: `${baseUrl}/produits`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/categories`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    { url: baseUrl, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 1 },
+    { url: `${baseUrl}/produits`, lastModified: new Date(), changeFrequency: 'daily' as const, priority: 0.9 },
+    { url: `${baseUrl}/categories`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
+    { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: 'monthly' as const, priority: 0.5 },
   ];
 
   const productPages = products.map((product: { id: any; updatedAt: any; createdAt: any; }) => ({
