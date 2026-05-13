@@ -15,6 +15,8 @@ import {
 import { db } from '../../../../../../../lib/firebase/config';
 
 import type { Product, ProductImage } from '../../../../../../../types/product';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import type { Category } from '../../../../../../../types/category';
 
 import { ImageUpload } from '../../../../../../../components/dashboard/ProductImageUpload';
 import { Route } from 'next';
@@ -23,16 +25,16 @@ import { Route } from 'next';
    CATEGORIES
 ========================================================= */
 
-const CATEGORIES: Record<string, string> = {
-  refrigeration: 'Réfrigération',
-  pizza: 'Équipement Pizza',
-  bakery: 'Boulangerie',
-  fryers: 'Friteuses',
-  grills: 'Grillades',
-  shawarma: 'Shawarma',
-  pastry: 'Pâtisserie',
-  furniture: 'Mobilier',
-};
+// const CATEGORIES: Record<string, string> = {
+//   refrigeration: 'Réfrigération',
+//   pizza: 'Équipement Pizza',
+//   bakery: 'Boulangerie',
+//   fryers: 'Friteuses',
+//   grills: 'Grillades',
+//   shawarma: 'Shawarma',
+//   pastry: 'Pâtisserie',
+//   furniture: 'Mobilier',
+// };
 
 /* =========================================================
    PAGE
@@ -68,7 +70,12 @@ export default function EditProductPage() {
       voltage: '220V/50Hz',
       refrigerant: '',
     },
+    isExternalSrc: false,
+    imageExternalLinks: [''],
   });
+
+  const [categories, setCategories] = useState<Category[]>([]);
+
 
   /* =========================================================
      FETCH PRODUCT
@@ -101,6 +108,8 @@ export default function EditProductPage() {
           images: data.images || [],
           keySpecs: data.keySpecs || [''],
           specifications: data.specifications || {},
+          isExternalSrc: data.isExternalSrc || false,
+          imageExternalLinks: data.imageExternalLinks || [''],
         });
 
       } catch (error) {
@@ -119,6 +128,23 @@ export default function EditProductPage() {
     fetchProduct();
 
   }, [productId, router]);
+
+  //================fetch categories for dropdown========================
+useEffect(() => {
+  const fetchCategories = async () => {
+    const q = query(
+      collection(db, 'categories'),
+      where('level', '==', 'main')
+    );
+    const snapshot = await getDocs(q);
+    const data = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Category[];
+    setCategories(data);
+  };
+  fetchCategories();
+}, []);
 
   /* =========================================================
      HANDLE CHANGE
@@ -219,100 +245,129 @@ export default function EditProductPage() {
   ========================================================= */
 
   const handleImagesChange = (
-  images: ProductImage[]
-) => {
+    images: ProductImage[]
+  ) => {
 
-  setFormData(prev => ({
-    ...prev,
-    images,
-  }));
-};
+    setFormData(prev => ({
+      ...prev,
+      images,
+    }));
+  };
 
+  /* =========================================================
+     EXTERNAL IMAGE LINKS
+  ========================================================= */
 
+  const handleExternalLinkChange = (index: number, value: string) => {
+    const updated = [...(formData.imageExternalLinks || [''])];
+    updated[index] = value;
+    setFormData(prev => ({
+      ...prev,
+      imageExternalLinks: updated,
+    }));
+  };
 
-/* =========================================================
-   SUBMIT
-========================================================= */
+  const addExternalLink = () => {
+    setFormData(prev => ({
+      ...prev,
+      imageExternalLinks: [...(prev.imageExternalLinks || []), ''],
+    }));
+  };
 
-const handleSubmit = async (
-  e: React.FormEvent
-) => {
+  const removeExternalLink = (index: number) => {
+    const updated = [...(formData.imageExternalLinks || [])];
+    updated.splice(index, 1);
+    setFormData(prev => ({
+      ...prev,
+      imageExternalLinks: updated.length ? updated : [''],
+    }));
+  };
 
-  e.preventDefault();
+  /* =========================================================
+     SUBMIT
+  ========================================================= */
 
-  setLoading(true);
+  const handleSubmit = async (
+    e: React.FormEvent
+  ) => {
 
-  try {
+    e.preventDefault();
 
-    const productData = {
+    setLoading(true);
 
-      name: formData.name,
+    try {
 
-      description: formData.description,
+      const productData = {
 
-      price: formData.price ?? null,
+        name: formData.name,
 
-      currency: formData.currency || 'MAD',
+        description: formData.description,
 
-      category: formData.category,
+        price: formData.price ?? null,
 
-      subCategory:
-        formData.subCategory || '',
+        currency: formData.currency || 'MAD',
 
-      brand:
-        formData.brand || '',
+        category: formData.category,
 
-      images:
-        formData.images || [],
+        subCategory:
+          formData.subCategory || '',
 
-      stockStatus:
-        formData.stockStatus ||
-        'in_stock',
+        brand:
+          formData.brand || '',
 
-      isOnPromotion:
-        formData.isOnPromotion || false,
+        images:
+          formData.images || [],
 
-      keySpecs:
-        formData.keySpecs?.filter(
-          spec => spec.trim() !== ''
-        ) || [],
+        stockStatus:
+          formData.stockStatus ||
+          'in_stock',
 
-      specifications:
-        formData.specifications || {},
+        isOnPromotion:
+          formData.isOnPromotion || false,
 
-      updatedAt:
-        new Date().toISOString(),
-    };
+        keySpecs:
+          formData.keySpecs?.filter(
+            spec => spec.trim() !== ''
+          ) || [],
 
-    // REMOVE UNDEFINED VALUES
-    const cleanData = Object.fromEntries(
-      Object.entries(productData).filter(
-        ([_, value]) =>
-          value !== undefined
-      )
-    );
+        specifications:
+          formData.specifications || {},
 
-    await updateDoc(
-      doc(db, 'products', productId),
-      cleanData
-    );
+        isExternalSrc: formData.isExternalSrc || false,
+        imageExternalLinks: formData.imageExternalLinks?.filter(link => link.trim() !== '') || [],
+        updatedAt:
+          new Date().toISOString(),
+      };
 
-    router.push(
-      '/europmat/admin/products' as any
-    );
+      // REMOVE UNDEFINED VALUES
+      const cleanData = Object.fromEntries(
+        Object.entries(productData).filter(
+          ([_, value]) =>
+            value !== undefined
+        )
+      );
 
-  } catch (error) {
+      await updateDoc(
+        doc(db, 'products', productId),
+        cleanData
+      );
 
-    console.error(error);
+      router.push(
+        '/europmat/admin/products' as any
+      );
 
-    alert('Failed to update product');
+    } catch (error) {
 
-  } finally {
+      console.error(error);
 
-    setLoading(false);
+      alert('Failed to update product');
 
-  }
-};
+    } finally {
+
+      setLoading(false);
+
+    }
+  };
 
   /* =========================================================
      LOADING
@@ -338,7 +393,7 @@ const handleSubmit = async (
       <div className="flex items-center gap-4 mb-6">
 
         <Link
-          href={"/europmat/admin/products"as Route}
+          href={"/europmat/admin/products" as Route}
           className="p-2 hover:bg-beige-warm rounded-lg transition"
         >
           ←
@@ -377,28 +432,18 @@ const handleSubmit = async (
               required
             />
 
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="input-field"
-              required
-            >
-              <option value="">
-                Select category
-              </option>
-
-              {Object.entries(CATEGORIES).map(
-                ([value, label]) => (
-                  <option
-                    key={value}
-                    value={value}
-                  >
-                    {label}
-                  </option>
-                )
-              )}
-            </select>
+         <select
+  name="category"
+  value={formData.category}
+  onChange={handleChange}
+  className="input-field"
+  required
+>
+  <option value="">Select category</option>
+  {categories.map(cat => (
+    <option key={cat.id} value={cat.slug}>{cat.name}</option>
+  ))}
+</select>
 
             <input
               type="text"
@@ -469,20 +514,83 @@ const handleSubmit = async (
 
         </div>
 
-        {/* IMAGES */}
-        <div className="card-dashboard p-6 mb-6">
+        {/* IMAGES SECTION */}
+<div className="card-dashboard p-6 mb-6">
+  <h2 className="text-lg font-semibold mb-4">
+    Product Images
+  </h2>
 
-          <h2 className="text-lg font-semibold mb-4">
-            Product Images
-          </h2>
+  {/* External Source Toggle */}
+  <div className="flex items-center gap-3 mb-4 pb-4 border-b border-steel">
+    <input
+      type="checkbox"
+      name="isExternalSrc"
+      checked={formData.isExternalSrc || false}
+      onChange={handleChange}
+      className="w-4 h-4 rounded border-steel-dark text-navy-main focus:ring-navy-main"
+    />
+    <label className="text-sm font-medium text-charcoal">
+      Use external image URLs (Imgur, Cloudinary links)
+    </label>
+  </div>
 
-          <ImageUpload
-  images={formData.images || []}
-  onChange={handleImagesChange}
-  maxImages={10}
-/>
-
+  {/* External Links (shown when isExternalSrc is true) */}
+  {formData.isExternalSrc ? (
+    <div className="space-y-2">
+      <label className="label">External Image URLs</label>
+      {(formData.imageExternalLinks || ['']).map((link, index) => (
+        <div key={index} className="flex gap-2">
+          <input
+            type="url"
+            value={link}
+            onChange={(e) => handleExternalLinkChange(index, e.target.value)}
+            className="input-field flex-1"
+            placeholder="https://i.imgur.com/example.jpg"
+          />
+          {(formData.imageExternalLinks || []).length > 1 && (
+            <button
+              type="button"
+              onClick={() => removeExternalLink(index)}
+              className="px-3 py-2 text-red-premium hover:bg-red-50 rounded-lg transition"
+            >
+              ✕
+            </button>
+          )}
         </div>
+      ))}
+      <button
+        type="button"
+        onClick={addExternalLink}
+        className="text-sm text-navy-accent hover:underline flex items-center gap-1 mt-2"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+        Add external link
+      </button>
+
+      {/* Preview */}
+      {formData.imageExternalLinks?.some(link => link.trim()) && (
+        <div className="grid grid-cols-4 gap-2 mt-4">
+          {formData.imageExternalLinks
+            .filter(link => link.trim())
+            .map((link, index) => (
+              <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-steel border border-steel">
+                <img src={link} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+              </div>
+            ))}
+        </div>
+      )}
+    </div>
+  ) : (
+    /* Cloudinary Upload (shown when isExternalSrc is false) */
+    <ImageUpload
+      images={formData.images || []}
+      onChange={handleImagesChange}
+      maxImages={10}
+    />
+  )}
+</div>
 
         {/* KEY SPECS */}
         <div className="card-dashboard p-6 mb-6">
@@ -581,7 +689,7 @@ const handleSubmit = async (
         <div className="flex justify-end gap-4">
 
           <Link
-            href={"/europmat/admin/products"as Route}
+            href={"/europmat/admin/products" as Route}
             className="btn-secondary"
           >
             Cancel

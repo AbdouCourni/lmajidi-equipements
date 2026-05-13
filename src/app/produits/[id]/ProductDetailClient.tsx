@@ -15,6 +15,8 @@ import type {
 } from '../../../../types/product';
 
 import ProductCard from '../../../../components/ProductCard';
+import { getPrimaryImage, getProductImages } from '../../../../types/product';
+
 
 interface ProductDetailClientProps {
   product: Product;
@@ -27,19 +29,14 @@ export default function ProductDetailClient({
   relatedProducts,
 }: ProductDetailClientProps) {
 
+
   /* =========================================================
-     PRIMARY IMAGE
-  ========================================================= */
+ IMAGES
+========================================================= */
 
-  const primaryImage =
-
-    product.images?.find(
-      image => image.isPrimary
-    )?.url ||
-
-    product.images?.[0]?.url ||
-
-    null;
+  // Use getPrimaryImage and getProductImages helpers
+  const primaryImage = getPrimaryImage(product);
+  const displayImages = getProductImages(product);
 
   /* =========================================================
      PRICE
@@ -50,8 +47,8 @@ export default function ProductDetailClient({
     product.price !== null
 
       ? `${product.price.toLocaleString(
-          'fr-MA'
-        )} ${product.currency}`
+        'fr-MA'
+      )} ${product.currency}`
 
       : 'Sur devis';
 
@@ -131,9 +128,7 @@ Merci.`
 
             {/* MAIN IMAGE */}
             <div className="relative aspect-square rounded-3xl overflow-hidden border border-steel bg-beige-warm">
-
               {primaryImage ? (
-
                 <Image
                   src={primaryImage}
                   alt={product.name}
@@ -141,44 +136,29 @@ Merci.`
                   priority
                   className="object-cover"
                 />
-
               ) : (
-
                 <div className="absolute inset-0 flex items-center justify-center text-7xl">
-
                   🏪
-
                 </div>
               )}
-
             </div>
 
             {/* GALLERY */}
-            {product.images &&
-              product.images.length >
-                1 && (
-
+            {displayImages.length > 1 && (
               <div className="grid grid-cols-4 gap-4 mt-4">
-
-                {product.images.map(
-                  image => (
-
-                    <div
-                      key={image.id}
-                      className="relative aspect-square rounded-2xl overflow-hidden border border-steel bg-beige-warm"
-                    >
-
-                      <Image
-                        src={image.url}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                      />
-
-                    </div>
-                  )
-                )}
-
+                {displayImages.map((url, index) => (
+                  <div
+                    key={index}
+                    className="relative aspect-square rounded-2xl overflow-hidden border border-steel bg-beige-warm"
+                  >
+                    <Image
+                      src={url}
+                      alt={`${product.name} - ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
               </div>
             )}
 
@@ -246,45 +226,45 @@ Merci.`
             {/* KEY SPECS */}
             {product.keySpecs &&
               product.keySpecs.length >
-                0 && (
+              0 && (
 
-              <div className="mb-8">
+                <div className="mb-8">
 
-                <h2 className="text-lg font-semibold text-charcoal mb-4">
+                  <h2 className="text-lg font-semibold text-charcoal mb-4">
 
-                  Points clés
+                    Points clés
 
-                </h2>
+                  </h2>
 
-                <div className="space-y-3">
+                  <div className="space-y-3">
 
-                  {product.keySpecs.map(
-                    (
-                      spec,
-                      index
-                    ) => (
+                    {product.keySpecs.map(
+                      (
+                        spec,
+                        index
+                      ) => (
 
-                      <div
-                        key={index}
-                        className="flex items-start gap-3"
-                      >
+                        <div
+                          key={index}
+                          className="flex items-start gap-3"
+                        >
 
-                        <div className="w-2 h-2 rounded-full bg-navy-main mt-2"></div>
+                          <div className="w-2 h-2 rounded-full bg-navy-main mt-2"></div>
 
-                        <p className="text-steel-dark">
+                          <p className="text-steel-dark">
 
-                          {spec}
+                            {spec}
 
-                        </p>
+                          </p>
 
-                      </div>
-                    )
-                  )}
+                        </div>
+                      )
+                    )}
+
+                  </div>
 
                 </div>
-
-              </div>
-            )}
+              )}
 
             {/* CTA */}
             <div className="flex flex-col sm:flex-row gap-4">
@@ -341,60 +321,60 @@ Merci.`
             product.specifications
           ).length > 0 && (
 
-          <div className="mt-16">
+            <div className="mt-16">
 
-            <h2 className="text-2xl font-bold text-charcoal mb-6">
+              <h2 className="text-2xl font-bold text-charcoal mb-6">
 
-              Spécifications techniques
+                Spécifications techniques
 
-            </h2>
+              </h2>
 
-            <div className="rounded-2xl border border-steel overflow-hidden">
+              <div className="rounded-2xl border border-steel overflow-hidden">
 
-              {Object.entries(
-                product.specifications
-              )
-
-                .filter(
-                  ([_, value]) =>
-                    value
+                {Object.entries(
+                  product.specifications
                 )
 
-                .map(
-                  (
-                    [key, value]
-                  ) => (
-
-                    <div
-                      key={key}
-                      className="grid grid-cols-2 border-b border-steel last:border-0"
-                    >
-
-                      <div className="bg-beige-warm/60 px-4 py-3 font-medium text-charcoal capitalize">
-
-                        {key.replace(
-                          /_/g,
-                          ' '
-                        )}
-
-                      </div>
-
-                      <div className="px-4 py-3 text-steel-dark">
-
-                        {String(
-                          value
-                        )}
-
-                      </div>
-
-                    </div>
+                  .filter(
+                    ([_, value]) =>
+                      value
                   )
-                )}
+
+                  .map(
+                    (
+                      [key, value]
+                    ) => (
+
+                      <div
+                        key={key}
+                        className="grid grid-cols-2 border-b border-steel last:border-0"
+                      >
+
+                        <div className="bg-beige-warm/60 px-4 py-3 font-medium text-charcoal capitalize">
+
+                          {key.replace(
+                            /_/g,
+                            ' '
+                          )}
+
+                        </div>
+
+                        <div className="px-4 py-3 text-steel-dark">
+
+                          {String(
+                            value
+                          )}
+
+                        </div>
+
+                      </div>
+                    )
+                  )}
+
+              </div>
 
             </div>
-
-          </div>
-        )}
+          )}
 
       </section>
 
@@ -405,48 +385,48 @@ Merci.`
       {relatedProducts.length >
         0 && (
 
-        <section className="py-16 bg-beige-warm/40 border-t border-steel">
+          <section className="py-16 bg-beige-warm/40 border-t border-steel">
 
-          <div className="container-custom">
+            <div className="container-custom">
 
-            <div className="mb-8">
+              <div className="mb-8">
 
-              <h2 className="text-3xl font-bold text-charcoal">
+                <h2 className="text-3xl font-bold text-charcoal">
 
-                Produits similaires
+                  Produits similaires
 
-              </h2>
+                </h2>
 
-              <p className="text-steel-dark mt-2">
+                <p className="text-steel-dark mt-2">
 
-                Découvrez d'autres équipements similaires
+                  Découvrez d'autres équipements similaires
 
-              </p>
+                </p>
+
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+
+                {relatedProducts.map(
+                  relatedProduct => (
+
+                    <ProductCard
+                      key={
+                        relatedProduct.id
+                      }
+                      product={
+                        relatedProduct
+                      }
+                    />
+                  )
+                )}
+
+              </div>
 
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-
-              {relatedProducts.map(
-                relatedProduct => (
-
-                  <ProductCard
-                    key={
-                      relatedProduct.id
-                    }
-                    product={
-                      relatedProduct
-                    }
-                  />
-                )
-              )}
-
-            </div>
-
-          </div>
-
-        </section>
-      )}
+          </section>
+        )}
 
     </div>
   );

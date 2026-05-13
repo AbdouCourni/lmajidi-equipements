@@ -4,6 +4,8 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { getProductImages } from '../types/product';
+
 
 import type { Route } from 'next';
 
@@ -37,11 +39,9 @@ export default function ProductCard({
      PRIMARY IMAGE
   ========================================================= */
 
-  const primaryImage =
-    product.images?.find(
-      image => image.isPrimary
-    )?.url ||
-    product.images?.[0]?.url;
+const primaryImage = product.isExternalSrc && product.imageExternalLinks?.length > 0
+  ? product.imageExternalLinks[0]
+  : product.images?.find(image => image.isPrimary)?.url || product.images?.[0]?.url;
 
   /* =========================================================
      WHATSAPP MESSAGE
@@ -102,7 +102,7 @@ export default function ProductCard({
         {primaryImage ? (
 
           <Image
-            src={primaryImage}
+            src={primaryImage || '/placeholder.png'}
             alt={product.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"

@@ -51,6 +51,8 @@ export interface Product {
   brand?: string;
 
   images: ProductImage[];
+  isExternalSrc: boolean;
+  imageExternalLinks: string[];
 
   stockStatus?: ProductStockStatus;
 
@@ -123,4 +125,20 @@ export function getProductStockStatus(
         color: 'bg-green-100 text-green-700'
       };
   }
+}
+export function getProductImages(product: Product): string[] {
+  if (product.isExternalSrc && product.imageExternalLinks?.length > 0) {
+    return product.imageExternalLinks;
+  }
+  return product.images
+    ?.sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0))
+    .map(img => img.url) || [];
+}
+
+export function getPrimaryImage(product: Product): string | null {
+  if (product.isExternalSrc && product.imageExternalLinks?.length > 0) {
+    return product.imageExternalLinks[0];
+  }
+  const primary = product.images?.find(img => img.isPrimary);
+  return primary?.url || product.images?.[0]?.url || null;
 }

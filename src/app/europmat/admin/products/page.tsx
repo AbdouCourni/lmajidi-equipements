@@ -5,6 +5,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getPrimaryImage } from '../../../../../types/product';
+
 import { 
   collection, deleteDoc, doc, getDocs, query, orderBy, limit, startAfter, where 
 } from 'firebase/firestore';
@@ -255,8 +257,7 @@ export default function ProductsPage() {
               </thead>
               <tbody className="divide-y divide-steel">
                 {products.map(product => {
-                  const primaryImage = product.images?.find(img => img.isPrimary)?.url || product.images?.[0]?.url;
-
+const primaryImage = getPrimaryImage(product);
                   return (
                     <tr key={product.id} className="hover:bg-beige-warm/40 transition">
                       <td className="px-5 py-4">

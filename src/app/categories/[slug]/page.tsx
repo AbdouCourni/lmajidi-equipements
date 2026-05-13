@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import type { Route } from 'next';
+import type { Metadata, Route } from 'next';
 import { notFound } from 'next/navigation';
 
 import ProductCard from '../../../../components/ProductCard';
@@ -13,7 +13,19 @@ import { Product } from '../../../../types/product';
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
 }
+export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const allCategories = await getAllCategories();
+  const category = allCategories.find(cat => cat.slug === slug);
+  
+  if (!category) return { title: 'Catégorie non trouvée' };
 
+  return {
+    title: `${category.name} - Équipement Professionnel | Europmat`,
+    description: category.description || `Découvrez notre gamme de ${category.name.toLowerCase()} pour professionnels au Maroc.`,
+    alternates: { canonical: `https://europmat.com/categories/${slug}` },
+  };
+}
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug } = await params;
 

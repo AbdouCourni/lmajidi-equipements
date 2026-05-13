@@ -49,6 +49,8 @@ export default function CreateProductPage() {
       voltage: '',
       refrigerant: '',
     },
+     isExternalSrc: false,
+  imageExternalLinks: [''],
   });
 
   const [images, setImages] = useState<ProductImage[]>([]);
@@ -299,6 +301,47 @@ export default function CreateProductPage() {
                 On Promotion
               </label>
             </div>
+
+            {formData.isExternalSrc && (
+  <div className="space-y-2">
+    <label className="label">External Image URLs</label>
+    {formData.imageExternalLinks.map((link, index) => (
+      <div key={index} className="flex gap-2">
+        <input
+          type="url"
+          value={link}
+          onChange={(e) => {
+            const newLinks = [...formData.imageExternalLinks];
+            newLinks[index] = e.target.value;
+            setFormData(prev => ({ ...prev, imageExternalLinks: newLinks }));
+          }}
+          className="input-field flex-1"
+          placeholder="https://i.imgur.com/example.jpg"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            const newLinks = formData.imageExternalLinks.filter((_, i) => i !== index);
+            setFormData(prev => ({ ...prev, imageExternalLinks: newLinks }));
+          }}
+          className="px-3 text-red-premium hover:bg-red-50 rounded-lg"
+        >
+          ✕
+        </button>
+      </div>
+    ))}
+    <button
+      type="button"
+      onClick={() => setFormData(prev => ({ 
+        ...prev, 
+        imageExternalLinks: [...prev.imageExternalLinks, ''] 
+      }))}
+      className="text-sm text-navy-accent hover:underline"
+    >
+      + Add external link
+    </button>
+  </div>
+)}
           </div>
         </div>
 
@@ -307,11 +350,13 @@ export default function CreateProductPage() {
           <h2 className="text-lg font-semibold text-charcoal mb-4">
             Images ({images.length}/10)
           </h2>
-          <ImageUpload
-            images={images}
-            onChange={setImages}
-            maxImages={10}
-          />
+         {!formData.isExternalSrc && (
+  <ImageUpload
+    images={images}
+    onChange={setImages}
+    maxImages={10}
+  />
+)}
         </div>
 
         {/* KEY SPECS */}

@@ -2,6 +2,20 @@
 import Hero from '../../components/Hero';
 import FeaturedProducts from '../../components/FeaturedProducts';
 
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Europmat',
+  url: 'https://europmat.com',
+  logo: 'https://europmat.com/images/logo.png',
+  contactPoint: {
+    '@type': 'ContactPoint',
+    telephone: '+212625652015',
+    contactType: 'sales',
+    availableLanguage: ['French', 'Arabic'],
+  },
+};
+
 export default function HomePage() {
   return (
     <>

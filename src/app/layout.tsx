@@ -16,8 +16,98 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Europmat - Équipements Professionnels",
-  description: "Votre partenaire en équipements professionnels pour restaurants, boulangeries et pâtisseries au Maroc.",
+  title: {
+    default: "Europmat - Équipement Professionnel pour Cuisines & Restaurants",
+    template: '%s | Europmat - Équipement Professionnel'
+  },
+  description: 'Europmat - Fournisseur leader d\'équipements professionnels pour restaurants, boulangeries, snacks et cuisines professionnelles au Maroc. Réfrigération, cuisson, préparation.',
+  keywords: [
+    'équipement professionnel Maroc',
+    'matériel restaurant Maroc',
+    'équipement cuisine professionnelle',
+    'froid commercial',
+    'four pizza professionnel',
+    'vitrine réfrigérée',
+    'matériel boulangerie',
+    'équipement snack',
+    'Europmat',
+    'matériel CHR Maroc'
+  ],
+  authors: [{ name: 'Europmat' }],
+  creator: 'Europmat',
+  publisher: 'Europmat',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL('https://europmat.com'),
+  alternates: {
+    canonical: '/',
+    languages: {
+      'fr': '/',
+      'ar': '/ar',
+    },
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'fr_MA',
+    url: 'https://europmat.com',
+    siteName: 'Europmat',
+    title: 'Europmat - Équipement Professionnel pour Cuisines & Restaurants',
+    description: 'Fournisseur d\'équipements professionnels pour restaurants, boulangeries et snacks au Maroc. Large gamme de produits de qualité.',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Europmat - Équipement Professionnel',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Europmat - Équipement Professionnel',
+    description: 'Équipements professionnels pour cuisines et restaurants au Maroc',
+    images: ['/twitter-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  icons: {
+    icon: [
+      {
+        url: '/favicon.ico',
+        sizes: '32x32',
+      },
+      {
+        url: '/favicon-16x16.png',
+        sizes: '16x16',
+        type: 'image/png',
+      },
+      {
+        url: '/favicon-32x32.png',
+        sizes: '32x32',
+        type: 'image/png',
+      },
+    ],
+    apple: [
+      {
+        url: '/apple-touch-icon.png',
+        sizes: '180x180',
+        type: 'image/png',
+      },
+    ],
+    shortcut: ['/favicon.ico'],
+  },
 };
 
 export default function RootLayout({

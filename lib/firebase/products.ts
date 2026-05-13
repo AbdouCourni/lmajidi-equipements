@@ -24,20 +24,12 @@ interface GetProductsOptions {
   onPromotion?: boolean;
 }
 
-export async function getProducts(options: GetProductsOptions = {}) {
-  const {
-    category,
-    search,
-    limit = 12,
-    page = 1,
-    featured,
-    onPromotion,
-  } = options;
+// src/lib/firebase/products.ts
 
-  // Build cache key
-  const cacheKey = JSON.stringify(options);
-  
-  // ← FIXED: Use Map.get() instead of single cache
+export async function getProducts(options: GetProductsOptions = {}) {
+  const { category, search, limit = 12, page = 1 } = options;
+
+  const cacheKey = JSON.stringify({ category, search, limit, page });
   const cached = cache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
     return cached.data;
@@ -50,17 +42,26 @@ export async function getProducts(options: GetProductsOptions = {}) {
       query = query.where('category', '==', category);
     }
 
-    if (onPromotion) {
-      query = query.where('isOnPromotion', '==', true);
-    }
-
     query = query.orderBy('createdAt', 'desc');
 
+    // Get total count FIRST
     const countSnapshot = await query.count().get();
     const total = countSnapshot.data().count;
 
-    query = query.limit(limit);
+    // FIX: Use offset-based pagination with cursor
+    const offset = (page - 1) * limit;
+    
+    if (offset > 0) {
+      // Get the document at offset position to start after
+      const startAfterSnapshot = await query.limit(offset).get();
+      const lastVisible = startAfterSnapshot.docs[startAfterSnapshot.docs.length - 1];
+      
+      if (lastVisible) {
+        query = query.startAfter(lastVisible);
+      }
+    }
 
+    query = query.limit(limit);
     const snapshot = await query.get();
 
     let products = snapshot.docs.map(doc => ({
@@ -68,6 +69,7 @@ export async function getProducts(options: GetProductsOptions = {}) {
       ...doc.data(),
     })) as Product[];
 
+    // Client-side search filter
     if (search) {
       const searchLower = search.toLowerCase();
       products = products.filter(p =>
@@ -79,25 +81,17 @@ export async function getProducts(options: GetProductsOptions = {}) {
 
     const result = {
       products,
-      total,
+      total: search ? products.length : total,
       page,
-      totalPages: Math.ceil(total / limit),
-      hasMore: page * limit < total,
+      totalPages: Math.ceil((search ? products.length : total) / limit),
+      hasMore: page * limit < (search ? products.length : total),
     };
 
-    // ← FIXED: Use Map.set()
     cache.set(cacheKey, { data: result, timestamp: Date.now() });
-
     return result;
   } catch (error) {
     console.error('Error fetching products:', error);
-    return {
-      products: [],
-      total: 0,
-      page: 1,
-      totalPages: 0,
-      hasMore: false,
-    };
+    return { products: [], total: 0, page: 1, totalPages: 0, hasMore: false };
   }
 }
 /* =========================================================
@@ -205,5 +199,92 @@ export async function getProductsByCategory(
   } catch (error) {
     console.error('Error fetching products by category:', error);
     return [];
+  }
+}
+// Add to src/lib/firebase/products.ts
+
+interface GetProductsPageOptions {
+  limitCount?: number;
+  categoryId?: string;
+  page?: number;
+  search?: string;
+}
+
+export async function getProductsPage(options: GetProductsPageOptions = {}) {
+  const {
+    limitCount = 30,
+    categoryId,
+    page = 1,
+    search,
+  } = options;
+
+  const cacheKey = JSON.stringify({ limitCount, categoryId, page, search });
+  const cached = cache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data;
+  }
+
+  try {
+    let query: FirebaseFirestore.Query = adminDb.collection('products');
+
+    if (categoryId) {
+      query = query.where('category', '==', categoryId);
+    }
+
+    query = query.orderBy('createdAt', 'desc');
+
+    // Get total count
+    const countSnapshot = await query.count().get();
+    const total = countSnapshot.data().count;
+
+    // Handle pagination
+    const offset = (page - 1) * limitCount;
+    
+    if (offset > 0) {
+      const startAfterSnapshot = await query.limit(offset).get();
+      const lastVisible = startAfterSnapshot.docs[startAfterSnapshot.docs.length - 1];
+      
+      if (lastVisible) {
+        query = query.startAfter(lastVisible);
+      }
+    }
+
+    query = query.limit(limitCount);
+    const snapshot = await query.get();
+
+    let products = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Product[];
+
+    // Client-side search
+    if (search) {
+      const searchLower = search.toLowerCase();
+      products = products.filter(p =>
+        p.name.toLowerCase().includes(searchLower) ||
+        p.description?.toLowerCase().includes(searchLower) ||
+        p.brand?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    const result = {
+      products,
+      total: search ? products.length : total,
+      page,
+      totalPages: Math.ceil((search ? products.length : total) / limitCount),
+      hasMore: page * limitCount < (search ? products.length : total),
+    };
+
+    cache.set(cacheKey, { data: result, timestamp: Date.now() });
+    return result;
+  } catch (error) {
+    console.error('Error fetching products page:', error);
+    return {
+      products: [],
+      total: 0,
+      page: 1,
+      totalPages: 0,
+      hasMore: false,
+    };
   }
 }
