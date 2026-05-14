@@ -15,11 +15,11 @@ const navItems: {
   href: Route;
   label: string;
 }[] = [
-  { href: '/', label: 'Accueil' },
-  { href: '/categories' as Route, label: 'Catégories' },
-  { href: '/produits'as Route, label: 'Produits' },
-  { href: '/contact'as Route, label: 'Contact' },
-];
+    { href: '/', label: 'Accueil' },
+    { href: '/categories' as Route, label: 'Catégories' },
+    { href: '/produits' as Route, label: 'Produits' },
+    { href: '/contact' as Route, label: 'Contact' },
+  ];
 
 export default function Header() {
   const pathname = usePathname();
@@ -46,17 +46,17 @@ export default function Header() {
             href={'/' as Route}
             className="flex items-center gap-3"
           >
-          <div className="flex items-center">
-  <Image
-    src="/logoText.png"
-    alt="Europmat"
-    width={180}
-    height={36}
-    priority
-    className="h-9 w-auto object-contain"
-  />
-</div>
-{/* 
+            <div className="flex items-center">
+              <Image
+                src="/logoText.png"
+                alt="Europmat"
+                width={180}
+                height={36}
+                priority
+                className="h-9 w-auto object-contain"
+              />
+            </div>
+            {/* 
             <div>
               <p className="font-bold text-gray-900 text-lg leading-none">
                 Europmat
@@ -75,11 +75,10 @@ export default function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`transition-colors text-sm font-medium ${
-                  isActive(item.href)
+                className={`transition-colors text-sm font-medium ${isActive(item.href)
                     ? 'text-blue-600'
                     : 'text-gray-600 hover:text-blue-600'
-                }`}
+                  }`}
               >
                 {item.label}
               </Link>
@@ -97,10 +96,10 @@ export default function Header() {
               rel="noopener noreferrer"
               className="hidden md:flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition"
             >
-<WhatsAppIcon className="w-4 h-4" />
-          <span>WhatsApp</span>            </a>
-           
-              
+              <WhatsAppIcon className="w-4 h-4" />
+              <span>WhatsApp</span>            </a>
+
+
             {/* MOBILE BUTTON */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -144,11 +143,10 @@ export default function Header() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`px-4 py-3 rounded-xl text-sm font-medium transition ${
-                    isActive(item.href)
+                  className={`px-4 py-3 rounded-xl text-sm font-medium transition ${isActive(item.href)
                       ? 'bg-blue-50 text-blue-600'
                       : 'text-gray-600 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   {item.label}
                 </Link>

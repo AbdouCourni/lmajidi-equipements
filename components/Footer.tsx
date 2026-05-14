@@ -10,9 +10,9 @@ import type { Route } from 'next';
 import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../lib/firebase/config';
 import type { Category } from '../types/category';
-import { 
-  MapPin, 
-  Phone, 
+import {
+  MapPin,
+  Phone,
   Mail,
   Send,
   Clock,
@@ -58,7 +58,7 @@ export default function Footer() {
   // Handle newsletter subscription
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !email.includes('@')) {
       setStatus('error');
       setMessage('Veuillez entrer un email valide');
@@ -67,14 +67,14 @@ export default function Footer() {
 
     try {
       setStatus('loading');
-      
+
       // Check if already subscribed
       const existingQuery = query(
         collection(db, 'subscribeList'),
         where('email', '==', email.toLowerCase().trim())
       );
       const existingSnapshot = await getDocs(existingQuery);
-      
+
       if (!existingSnapshot.empty) {
         setStatus('error');
         setMessage('Cet email est déjà inscrit');
@@ -91,7 +91,7 @@ export default function Footer() {
       setStatus('success');
       setMessage('Merci de votre inscription !');
       setEmail('');
-      
+
       setTimeout(() => {
         setStatus('idle');
         setMessage('');
@@ -108,33 +108,34 @@ export default function Footer() {
       {/* Main Footer */}
       <div className="container-custom py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-          
+
           {/* Brand Column */}
           <div>
-            <div className="flex items-center gap-3 mb-4">
-              <Image
-                src="/h-logo48.png"
-                alt="Europmat"
-                width={180}
-                height={50}
-                className="h-9 w-auto object-contain brightness-0 invert"
-              />
-            </div>
+          <div className="flex">
+  <Image
+    src="/logoText.png"
+    alt="Europmat"
+    width={180}
+    height={36}
+    priority
+    className="h-9 w-auto object-contain rounded-lg"
+  />
+</div>
             <p className="text-steel-dark text-sm leading-relaxed mb-4">
-              Leader marocain en équipements professionnels pour la restauration, 
+              Leader marocain en équipements professionnels pour la restauration,
               boulangerie et pâtisserie depuis 2005.
             </p>
             <div className="flex gap-3">
-              <a 
-                href="https://wa.me/212625652015" 
-                target="_blank" 
+              <a
+                href="https://wa.me/212625652015"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-green-600/20 text-green-400 px-3 py-2 rounded-lg text-sm hover:bg-green-600 hover:text-white transition-all duration-300"
               >
                 <WhatsAppIcon className="w-5 h-5 text-green-500" />
                 <span>WhatsApp</span>
               </a>
-              <a 
+              <a
                 href="mailto:contact@europmat.ma"
                 className="flex items-center gap-2 bg-navy-main/20 text-navy-accent px-3 py-2 rounded-lg text-sm hover:bg-navy-main hover:text-white transition-all duration-300"
               >
@@ -150,8 +151,8 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               {quickLinks.map((link) => (
                 <li key={link.href}>
-                  <Link 
-                    href={link.href} 
+                  <Link
+                    href={link.href}
                     className="text-steel-dark hover:text-beige-300 transition-colors duration-200 inline-flex items-center gap-1 group"
                   >
                     <span className="opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">→</span>
@@ -169,7 +170,7 @@ export default function Footer() {
               {categories.length > 0 ? (
                 categories.map((cat) => (
                   <li key={cat.id}>
-                    <Link 
+                    <Link
                       href={`/produits?category=${cat.slug}` as Route}
                       className="text-steel-dark hover:text-beige-300 transition-colors duration-200 inline-flex items-center gap-1 group"
                     >
@@ -198,8 +199,8 @@ export default function Footer() {
                 <span>Hay Arrid, à côté de Ecole Al Mada, Nador, Maroc</span>
               </li>
               <li>
-                <a 
-                  href="tel:+212625652015" 
+                <a
+                  href="tel:+212625652015"
                   className="flex items-center gap-3 text-steel-dark hover:text-beige-300 transition-colors"
                 >
                   <Phone size={18} className="text-navy-accent" />
@@ -207,8 +208,8 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a 
-                  href="tel:+212661767453" 
+                <a
+                  href="tel:+212661767453"
                   className="flex items-center gap-3 text-steel-dark hover:text-beige-300 transition-colors"
                 >
                   <Phone size={18} className="text-navy-accent" />
@@ -216,8 +217,8 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a 
-                  href="mailto:contact@europmat.ma" 
+                <a
+                  href="mailto:contact@europmat.ma"
                   className="flex items-center gap-3 text-steel-dark hover:text-beige-300 transition-colors"
                 >
                   <Mail size={18} className="text-navy-accent" />
@@ -257,7 +258,7 @@ export default function Footer() {
                 required
                 className="flex-1 px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-navy-accent transition-colors"
               />
-              <button 
+              <button
                 type="submit"
                 disabled={status === 'loading'}
                 className="px-6 py-2.5 bg-navy-main hover:bg-navy-professional rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
