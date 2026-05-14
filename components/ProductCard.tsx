@@ -63,7 +63,9 @@ const primaryImage = product.isExternalSrc && product.imageExternalLinks?.length
 
       `*Référence:* ${
         product.id
-      }%0A%0A` +
+      }%0A` +
+
+      `*Lien:* https://europmat.com/produits/${product.id}%0A%0A` +
 
       `*Description:*%0A${
         product.description.substring(
@@ -85,7 +87,6 @@ const primaryImage = product.isExternalSrc && product.imageExternalLinks?.length
 
     return message;
   };
-
   return (
 
     <div className="relative group bg-white rounded-2xl overflow-hidden border border-steel shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">

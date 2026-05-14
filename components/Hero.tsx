@@ -183,7 +183,7 @@ className="object-cover object-top"
               </Link>
 
               <a
-                href="https://wa.me/212625652015?text=Bonjour%2C%20je%20souhaite%20un%20devis"
+                href="https://wa.me/212654063922?text=Bonjour%2C%20je%20souhaite%20un%20devis"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-secondary border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white text-lg px-8 py-4"
