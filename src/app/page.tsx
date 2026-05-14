@@ -58,13 +58,13 @@ export default function HomePage() {
       </div>
 
       {/* Featured Products */}
-     <section className="py-12 md:py-16 lg:py-20 bg-beige-warm">
+   <section className="py-12 md:py-16 bg-beige-warm">
   <div className="container-custom">
     <div className="text-center mb-8 md:mb-12">
-      <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-charcoal mb-3 md:mb-4">
+      <h2 className="text-2xl md:text-3xl font-bold text-charcoal mb-3">
         Nos meilleures ventes
       </h2>
-      <p className="text-steel-dark text-sm md:text-base max-w-2xl mx-auto px-4">
+      <p className="text-steel-dark max-w-2xl mx-auto text-sm md:text-base px-4">
         Découvrez les équipements les plus populaires auprès de nos clients
       </p>
     </div>

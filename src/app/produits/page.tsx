@@ -48,70 +48,65 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   return (
     <div className="min-h-screen bg-white">
       
-      {/* FIXED SEARCH BAR + CATEGORIES */}
-      <div className="sticky top-0 z-40 bg-white border-b border-steel shadow-sm">
-        <div className="container-custom py-3">
-          
-          {/* SEARCH ROW */}
-          <form action="/produits" method="GET" className="flex items-center gap-2">
-            <div className="flex-1 relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-steel-dark z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                type="text"
-                name="search"
-                defaultValue={search}
-                placeholder="Rechercher un produit..."
-                className="input-field pl-10 pr-10"
-                autoComplete="off"
-              />
-              {search && (
-                <Link
-                  href={`/produits${categoryParam ? `?category=${encodeURIComponent(categoryParam)}` : ''}` as Route}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-steel-dark hover:text-red-500 transition"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </Link>
-              )}
-            </div>
-            {categoryParam && <input type="hidden" name="category" value={categoryParam} />}
-            <button type="submit" className="btn-primary text-sm px-4 py-2.5 whitespace-nowrap">
-              Rechercher
-            </button>
-            {(search || categoryParam) && (
-              <Link href={'/produits' as Route} className="btn-ghost text-sm whitespace-nowrap">
-                Effacer
-              </Link>
-            )}
-          </form>
-
-          {/* CATEGORIES ROW - Desktop: next to search, Mobile: below */}
-          <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
-            <Link
-              href={'/produits' as Route}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition ${
-                !categoryParam ? 'bg-navy-main text-white' : 'bg-beige-warm text-charcoal hover:bg-steel'
-              }`}
-            >
-              Tous
-            </Link>
-            {categories.map(cat => (
-              <Link
-                key={cat.id}
-                href={`/produits?category=${encodeURIComponent(cat.slug)}` as Route}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition ${
-                  categoryParam === cat.slug ? 'bg-navy-main text-white' : 'bg-beige-warm text-charcoal hover:bg-steel'
-                }`}
-              >
-                {cat.name}
-              </Link>
-            ))}
-          </div>
-        </div>
+     {/* FIXED SEARCH BAR + CATEGORIES */}
+<div className="sticky top-0 z-40 bg-white border-b border-steel shadow-sm">
+  <div className="container-custom py-3">
+    
+    {/* SEARCH ROW */}
+    <form action="/produits" method="GET" className="flex items-center gap-2">
+      <div className="flex-1 relative">
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-steel-dark z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          type="text"
+          name="search"
+          defaultValue={search}
+          placeholder="Rechercher un produit..."
+          className="input-field pl-10 pr-10"
+          autoComplete="off"
+        />
+        {search && (
+          <Link
+            href={`/produits${categoryParam ? `?category=${encodeURIComponent(categoryParam)}` : ''}` as Route}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-steel-dark hover:text-red-500 transition"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </Link>
+        )}
       </div>
+      {categoryParam && <input type="hidden" name="category" value={categoryParam} />}
+      <button type="submit" className="btn-primary text-sm px-4 py-2.5 whitespace-nowrap">
+        Rechercher
+      </button>
+    </form>
+
+    {/* CATEGORIES ROW */}
+    <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
+      <Link
+        href={'/produits' as Route}
+        className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition ${
+          !categoryParam ? 'bg-navy-main text-white' : 'bg-beige-warm text-charcoal hover:bg-steel'
+        }`}
+      >
+        Tous
+      </Link>
+      {categories.map(cat => (
+        <Link
+          key={cat.id}
+          href={`/produits?category=${encodeURIComponent(cat.slug)}` as Route}
+          className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition ${
+            categoryParam === cat.slug ? 'bg-navy-main text-white' : 'bg-beige-warm text-charcoal hover:bg-steel'
+          }`}
+        >
+          {cat.name}
+        </Link>
+      ))}
+    </div>
+  </div>
+</div>
 
       <div className="container-custom py-6">
         

@@ -15,7 +15,7 @@ const SLIDES = [
     category: 'refrigeration',
   },
   {
-    image: 'https://res.cloudinary.com/dfsmkq5mw/image/upload/v1778428813/bakery_em8bxi.png',
+    image: 'https://res.cloudinary.com/dfsmkq5mw/image/upload/v1778773819/bakery_msdbb9.png',
     title: 'Matériel de Boulangerie',
     subtitle: 'Qualité professionnelle',
     category: 'bakery',
@@ -183,7 +183,7 @@ className="object-cover object-top"
               </Link>
 
               <a
-                href="https://wa.me/212654063922?text=Bonjour%2C%20je%20souhaite%20un%20devis"
+                href="https://wa.me/212659783940?text=Bonjour%2C%20je%20souhaite%20un%20devis"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-secondary border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white text-lg px-8 py-4"

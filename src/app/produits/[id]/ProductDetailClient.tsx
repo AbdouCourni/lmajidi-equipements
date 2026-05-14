@@ -127,7 +127,7 @@ Merci.`
           <div>
 
             {/* MAIN IMAGE */}
-            <div className="relative aspect-square rounded-3xl overflow-hidden border border-steel bg-beige-warm">
+            <div className="relative aspect-square rounded-3xl overflow-hidden border border-steel bg-white">
               {primaryImage ? (
                 <Image
                   src={primaryImage}
