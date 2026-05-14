@@ -1,17 +1,23 @@
 // src/components/Footer.tsx
+
 'use client';
 
-import  WhatsAppIcon  from './WhatsAppIcon';
+import { useState, useEffect } from 'react';
+import WhatsAppIcon from './WhatsAppIcon';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Route } from 'next';
+import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../lib/firebase/config';
+import type { Category } from '../types/category';
 import { 
   MapPin, 
   Phone, 
-  Mail, 
-  MessageCircle,
+  Mail,
   Send,
-  Clock
+  Clock,
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
 
 const quickLinks: { href: Route; label: string }[] = [
@@ -21,40 +27,100 @@ const quickLinks: { href: Route; label: string }[] = [
   { href: '/contact' as Route, label: 'Contact' },
 ];
 
-const categoryLinks: { href: Route; label: string }[] = [
-  { href: '/categories/refrigeration' as Route, label: 'Réfrigération' },
-  { href: '/categories/cooking' as Route, label: 'Cuisson' },
-  { href: '/categories/bakery' as Route, label: 'Boulangerie' },
-  { href: '/categories/preparation' as Route, label: 'Préparation' },
-  { href: '/categories/snack-equipment' as Route, label: 'Équipement Snack' },
-  { href: '/categories/furniture' as Route, label: 'Mobilier' },
-];
-
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [message, setMessage] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  // Fetch main categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const q = query(
+          collection(db, 'categories'),
+          where('level', '==', 'main')
+        );
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Category[];
+        setCategories(data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Handle newsletter subscription
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !email.includes('@')) {
+      setStatus('error');
+      setMessage('Veuillez entrer un email valide');
+      return;
+    }
+
+    try {
+      setStatus('loading');
+      
+      // Check if already subscribed
+      const existingQuery = query(
+        collection(db, 'subscribeList'),
+        where('email', '==', email.toLowerCase().trim())
+      );
+      const existingSnapshot = await getDocs(existingQuery);
+      
+      if (!existingSnapshot.empty) {
+        setStatus('error');
+        setMessage('Cet email est déjà inscrit');
+        return;
+      }
+
+      // Add to Firestore
+      await addDoc(collection(db, 'subscribeList'), {
+        email: email.toLowerCase().trim(),
+        subscribedAt: new Date().toISOString(),
+        source: 'footer',
+      });
+
+      setStatus('success');
+      setMessage('Merci de votre inscription !');
+      setEmail('');
+      
+      setTimeout(() => {
+        setStatus('idle');
+        setMessage('');
+      }, 4000);
+    } catch (error) {
+      console.error('Subscription error:', error);
+      setStatus('error');
+      setMessage('Erreur lors de l\'inscription');
+    }
+  };
 
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-charcoal text-white">
       {/* Main Footer */}
       <div className="container-custom py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           
           {/* Brand Column */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center">
-                 <Image
-                    src="/h-logo48.png"
-                    alt="Europmat"
-                    width={180}
-                    height={50}
-                    priority
-                    className="h-10 w-auto object-contain"
-                  />
-              </div>
-              <span className="font-bold text-xl tracking-tight">Europmat</span>
+            <div className="flex items-center gap-3 mb-4">
+              <Image
+                src="/h-logo48.png"
+                alt="Europmat"
+                width={180}
+                height={50}
+                className="h-9 w-auto object-contain brightness-0 invert"
+              />
             </div>
-            <p className="text-gray-400 text-sm leading-relaxed mb-4">
+            <p className="text-steel-dark text-sm leading-relaxed mb-4">
               Leader marocain en équipements professionnels pour la restauration, 
               boulangerie et pâtisserie depuis 2005.
             </p>
@@ -70,7 +136,7 @@ export default function Footer() {
               </a>
               <a 
                 href="mailto:contact@europmat.ma"
-                className="flex items-center gap-2 bg-blue-600/20 text-blue-400 px-3 py-2 rounded-lg text-sm hover:bg-blue-600 hover:text-white transition-all duration-300"
+                className="flex items-center gap-2 bg-navy-main/20 text-navy-accent px-3 py-2 rounded-lg text-sm hover:bg-navy-main hover:text-white transition-all duration-300"
               >
                 <Mail size={16} />
                 <span>Email</span>
@@ -80,13 +146,13 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">Liens rapides</h4>
+            <h4 className="font-semibold text-lg mb-4 text-white">Liens rapides</h4>
             <ul className="space-y-2 text-sm">
               {quickLinks.map((link) => (
                 <li key={link.href}>
                   <Link 
                     href={link.href} 
-                    className="text-gray-400 hover:text-blue-400 transition-colors duration-200 inline-flex items-center gap-1 group"
+                    className="text-steel-dark hover:text-beige-300 transition-colors duration-200 inline-flex items-center gap-1 group"
                   >
                     <span className="opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">→</span>
                     {link.label}
@@ -96,61 +162,70 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Categories */}
+          {/* Categories - Dynamic from Firebase */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">Catégories</h4>
+            <h4 className="font-semibold text-lg mb-4 text-white">Catégories</h4>
             <ul className="space-y-2 text-sm">
-              {categoryLinks.map((link) => (
-                <li key={link.href}>
-                  <Link 
-                    href={link.href} 
-                    className="text-gray-400 hover:text-blue-400 transition-colors duration-200 inline-flex items-center gap-1 group"
-                  >
-                    <span className="opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">→</span>
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+              {categories.length > 0 ? (
+                categories.map((cat) => (
+                  <li key={cat.id}>
+                    <Link 
+                      href={`/produits?category=${cat.slug}` as Route}
+                      className="text-steel-dark hover:text-beige-300 transition-colors duration-200 inline-flex items-center gap-1 group"
+                    >
+                      <span className="opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">→</span>
+                      {cat.name}
+                    </Link>
+                  </li>
+                ))
+              ) : (
+                <>
+                  <li className="text-steel-dark">Réfrigération</li>
+                  <li className="text-steel-dark">Cuisson</li>
+                  <li className="text-steel-dark">Boulangerie</li>
+                  <li className="text-steel-dark">Préparation</li>
+                </>
+              )}
             </ul>
           </div>
 
           {/* Contact Info */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">Contact</h4>
+            <h4 className="font-semibold text-lg mb-4 text-white">Contact</h4>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-3 text-gray-400">
-                <MapPin size={18} className="text-blue-500 flex-shrink-0 mt-0.5" />
+              <li className="flex items-start gap-3 text-steel-dark">
+                <MapPin size={18} className="text-navy-accent flex-shrink-0 mt-0.5" />
                 <span>Hay Arrid, à côté de Ecole Al Mada, Nador, Maroc</span>
               </li>
               <li>
                 <a 
                   href="tel:+212625652015" 
-                  className="flex items-center gap-3 text-gray-400 hover:text-blue-400 transition-colors"
+                  className="flex items-center gap-3 text-steel-dark hover:text-beige-300 transition-colors"
                 >
-                  <Phone size={18} className="text-blue-500" />
+                  <Phone size={18} className="text-navy-accent" />
                   <span>06 25 65 20 15</span>
                 </a>
               </li>
               <li>
                 <a 
                   href="tel:+212661767453" 
-                  className="flex items-center gap-3 text-gray-400 hover:text-blue-400 transition-colors"
+                  className="flex items-center gap-3 text-steel-dark hover:text-beige-300 transition-colors"
                 >
-                  <Phone size={18} className="text-blue-500" />
+                  <Phone size={18} className="text-navy-accent" />
                   <span>06 61 76 74 53</span>
                 </a>
               </li>
               <li>
                 <a 
                   href="mailto:contact@europmat.ma" 
-                  className="flex items-center gap-3 text-gray-400 hover:text-blue-400 transition-colors"
+                  className="flex items-center gap-3 text-steel-dark hover:text-beige-300 transition-colors"
                 >
-                  <Mail size={18} className="text-blue-500" />
+                  <Mail size={18} className="text-navy-accent" />
                   <span>contact@europmat.ma</span>
                 </a>
               </li>
-              <li className="flex items-start gap-3 text-gray-400">
-                <Clock size={18} className="text-blue-500 flex-shrink-0 mt-0.5" />
+              <li className="flex items-start gap-3 text-steel-dark">
+                <Clock size={18} className="text-navy-accent flex-shrink-0 mt-0.5" />
                 <div>
                   <div>Lun-Ven: 9h00 - 19h00</div>
                   <div>Sam: 10h00 - 16h00</div>
@@ -165,32 +240,58 @@ export default function Footer() {
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="grid md:grid-cols-2 gap-6 items-center">
             <div>
-              <h4 className="font-semibold text-lg mb-2">Restez informé</h4>
-              <p className="text-gray-400 text-sm">
+              <h4 className="font-semibold text-lg mb-2 text-white">Restez informé</h4>
+              <p className="text-steel-dark text-sm">
                 Recevez nos actualités et offres promotionnelles
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3">
               <input
                 type="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (status !== 'idle') setStatus('idle');
+                }}
                 placeholder="Votre email"
-                className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                required
+                className="flex-1 px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-navy-accent transition-colors"
               />
-              <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2">
-                <Send size={16} />
+              <button 
+                type="submit"
+                disabled={status === 'loading'}
+                className="px-6 py-2.5 bg-navy-main hover:bg-navy-professional rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {status === 'loading' ? (
+                  <div className="spinner w-4 h-4 border-white/30 border-t-white"></div>
+                ) : (
+                  <Send size={16} />
+                )}
                 <span>S'abonner</span>
               </button>
-            </div>
+            </form>
+            {/* Status Messages */}
+            {status === 'success' && (
+              <div className="md:col-span-2 flex items-center gap-2 text-green-400 text-sm mt-2">
+                <CheckCircle size={16} />
+                {message}
+              </div>
+            )}
+            {status === 'error' && (
+              <div className="md:col-span-2 flex items-center gap-2 text-red-400 text-sm mt-2">
+                <AlertCircle size={16} />
+                {message}
+              </div>
+            )}
           </div>
         </div>
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-steel-dark">
               © {currentYear} Ste Europmat. Tous droits réservés.
             </p>
-           
           </div>
         </div>
       </div>

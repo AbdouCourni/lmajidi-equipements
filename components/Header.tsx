@@ -92,7 +92,7 @@ export default function Header() {
 
             {/* WHATSAPP */}
             <a
-              href="https://wa.me/212625652015"
+              href="https://wa.me/212659783940"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden md:flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition"

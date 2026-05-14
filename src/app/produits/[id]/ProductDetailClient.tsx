@@ -16,6 +16,7 @@ import type {
 
 import ProductCard from '../../../../components/ProductCard';
 import { getPrimaryImage, getProductImages } from '../../../../types/product';
+import WhatsAppIcon from '../../../../components/WhatsAppIcon';
 
 
 interface ProductDetailClientProps {
@@ -43,15 +44,9 @@ export default function ProductDetailClient({
   ========================================================= */
 
   const displayPrice =
-
-    product.price !== null
-
-      ? `${product.price.toLocaleString(
-        'fr-MA'
-      )} ${product.currency}`
-
-      : 'Sur devis';
-
+    product.price !== null && product.price > 0
+      ? `${product.price.toLocaleString('fr-MA')} ${product.currency}`
+      : 'Prix sur devis';
   /* =========================================================
      WHATSAPP
   ========================================================= */
@@ -64,6 +59,7 @@ export default function ProductDetailClient({
 Produit : ${product.name}
 Référence : ${product.id}
 Catégorie : ${product.category}
+Lien : https://europmat.com/produits/${product.id}
 
 Merci.`
     );
@@ -270,13 +266,14 @@ Merci.`
             <div className="flex flex-col sm:flex-row gap-4">
 
               <a
-                href={`https://wa.me/212625652015?text=${whatsappMessage}`}
+                href={`https://wa.me/212659783940?text=${whatsappMessage}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-primary text-center"
-              >
+                className="btn-primary text-center"                        >
 
-                💬 Demander un devis
+                <WhatsAppIcon className="w-4 h-4" />
+
+                <span>Demander un devis</span>
 
               </a>
 
