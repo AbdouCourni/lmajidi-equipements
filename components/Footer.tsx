@@ -135,13 +135,13 @@ export default function Footer() {
                 <WhatsAppIcon className="w-5 h-5 text-green-500" />
                 <span>WhatsApp</span>
               </a>
-              <a
+              {/* <a
                 href="mailto:contact@europmat.ma"
                 className="flex items-center gap-2 bg-navy-main/20 text-navy-accent px-3 py-2 rounded-lg text-sm hover:bg-navy-main hover:text-white transition-all duration-300"
               >
                 <Mail size={16} />
                 <span>Email</span>
-              </a>
+              </a> */}
             </div>
           </div>
 

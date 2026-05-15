@@ -9,13 +9,13 @@ import Image from 'next/image';
 
 const SLIDES = [
   {
-    image: 'https://i.imgur.com/gyj3XGX.png',
+    image: 'https://res.cloudinary.com/dfsmkq5mw/image/upload/v1778799317/gyj3XGX_btlmvs.png',
     title: 'Équipement Professionnel',
     subtitle: 'Pour restaurants & commerces',
     category: 'refrigeration',
   },
   {
-    image: 'https://res.cloudinary.com/dfsmkq5mw/image/upload/v1778773819/bakery_msdbb9.png',
+    image: 'https://res.cloudinary.com/dfsmkq5mw/image/upload/v1778799497/bakery_llty1r.png',
     title: 'Matériel de Boulangerie',
     subtitle: 'Qualité professionnelle',
     category: 'bakery',
@@ -121,7 +121,7 @@ export default function Hero() {
   return (
 <section 
   className="relative bg-gradient-to-br from-navy-main via-navy-professional to-navy-accent overflow-hidden flex items-center"
-  style={{ minHeight: 'calc(100vh - 72px)' }}
+  style={{ minHeight: 'calc(100vh - 72px)', maxHeight: 'min(900px, 100vh)' }}
 >      {/* SLIDING BACKGROUND IMAGES */}
       {SLIDES.map((slide, index) => (
         <div
