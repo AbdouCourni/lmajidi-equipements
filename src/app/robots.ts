@@ -10,6 +10,10 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/europmat/', '/api/', '/_next/'],
       },
       {
+        userAgent: 'Googlebot-Image',
+        allow: '/',
+      },
+      {
         userAgent: 'GPTBot',
         disallow: '/',
       },

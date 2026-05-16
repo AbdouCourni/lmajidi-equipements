@@ -428,3 +428,25 @@ Merci.`
     </div>
   );
 }
+// Add to your product detail page or ProductDetailClient
+export function ProductImageSchema({ product }: { product: Product }) {
+  const primaryImage = product.images?.[0]?.url || product.imageExternalLinks?.[0];
+  
+  if (!primaryImage) return null;
+
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'ImageObject',
+    contentUrl: primaryImage,
+    name: product.name,
+    description: product.description?.substring(0, 200),
+    representativeOfPage: true,
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
