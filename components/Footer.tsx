@@ -118,7 +118,7 @@ export default function Footer() {
     width={180}
     height={36}
     priority
-    className="h-9 w-auto object-contain rounded-lg"
+    className="h-9 w-auto object-contain bg-white rounded-lg"
   />
 </div>
             <p className="text-steel-dark text-sm leading-relaxed mb-4">

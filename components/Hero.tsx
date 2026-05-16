@@ -9,25 +9,25 @@ import Image from 'next/image';
 
 const SLIDES = [
   {
-    image: 'https://res.cloudinary.com/dfsmkq5mw/image/upload/v1778799317/gyj3XGX_btlmvs.png',
+    image: 'https://res.cloudinary.com/dfsmkq5mw/image/upload/v1778899622/pro-equipments_e4ff5r.webp',
     title: 'Équipement Professionnel',
     subtitle: 'Pour restaurants & commerces',
     category: 'refrigeration',
   },
   {
-    image: 'https://res.cloudinary.com/dfsmkq5mw/image/upload/v1778799497/bakery_llty1r.png',
+    image: 'https://res.cloudinary.com/dfsmkq5mw/image/upload/v1778899624/bakery_webp_ioiuqb.webp',
     title: 'Matériel de Boulangerie',
     subtitle: 'Qualité professionnelle',
     category: 'bakery',
   },
   {
-    image: 'https://res.cloudinary.com/dfsmkq5mw/image/upload/v1778428627/pizza_dhvbxs.png',
+    image: 'https://res.cloudinary.com/dfsmkq5mw/image/upload/v1778899623/pizza_webp_pls3wy.webp',
     title: 'Cuisine & Snack',
     subtitle: 'Tout l\'équipement nécessaire',
     category: 'cooking',
   },
    {
-    image: 'https://res.cloudinary.com/dfsmkq5mw/image/upload/v1778435221/europmat/categories/nrfsf354k7n2emeqymz9.png',
+    image: 'https://res.cloudinary.com/dfsmkq5mw/image/upload/v1778899624/refereg_webp_gd6f1e.webp',
     title: 'Froid Commercial',
     subtitle: 'Vitrines & chambres froides',
     category: 'refrigeration',
