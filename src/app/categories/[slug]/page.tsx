@@ -314,3 +314,45 @@ const products = category.level === 'main'
     </div>
   );
 }
+
+
+
+function BreadcrumbSchema({ category, parentCategory }: { category: any; parentCategory: any }) {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Accueil',
+        item: 'https://europmat.com',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Catégories',
+        item: 'https://europmat.com/categories',
+      },
+      ...(parentCategory ? [{
+        '@type': 'ListItem',
+        position: 3,
+        name: parentCategory.name,
+        item: `https://europmat.com/categories/${parentCategory.slug}`,
+      }] : []),
+      {
+        '@type': 'ListItem',
+        position: parentCategory ? 4 : 3,
+        name: category.name,
+        item: `https://europmat.com/categories/${category.slug}`,
+      },
+    ],
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}

@@ -75,3 +75,64 @@ export default function HomePage() {
     </>
   );
 }
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Quels types d\'équipements propose Europmat ?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Europmat propose une large gamme d\'équipements professionnels : réfrigération, cuisson, boulangerie, préparation, snack et mobilier pour restaurants.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Livrez-vous dans tout le Maroc ?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Oui, Europmat livre dans tout le Maroc avec un service rapide et professionnel.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Comment obtenir un devis ?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Contactez-nous par WhatsApp au 06 25 65 20 15 ou par email à contact@europmat.ma pour recevoir un devis gratuit.',
+      },
+    },
+  ],
+};
+
+const localBusinessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: 'Europmat',
+  image: 'https://europmat.com/logoText.png',
+  '@id': 'https://europmat.com',
+  url: 'https://europmat.com',
+  telephone: '+212625652015',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Hay Arrid, à côté de Ecole Al Mada',
+    addressLocality: 'Nador',
+    addressCountry: 'MA',
+  },
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: '09:00',
+      closes: '19:00',
+    },
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: 'Saturday',
+      opens: '10:00',
+      closes: '16:00',
+    },
+  ],
+};
