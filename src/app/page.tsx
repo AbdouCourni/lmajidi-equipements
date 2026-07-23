@@ -1,6 +1,9 @@
 // src/app/page.tsx
 import Hero from '../../components/Hero';
 import FeaturedProducts from '../../components/FeaturedProducts';
+import Link from 'next/link';
+import type { Route } from 'next';
+import { getBlogPosts } from '../../data/blog-posts';
 
 const organizationSchema = {
   '@context': 'https://schema.org',
@@ -17,8 +20,16 @@ const organizationSchema = {
 };
 
 export default function HomePage() {
+  const blogPosts = getBlogPosts().slice(0, 3);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([organizationSchema, localBusinessSchema, faqSchema]),
+        }}
+      />
       <Hero />
       
       {/* Trust Bar */}
@@ -72,6 +83,48 @@ export default function HomePage() {
     <FeaturedProducts />
   </div>
 </section>
+
+      <section dir="rtl" className="bg-white py-12 md:py-16">
+        <div className="container-custom">
+          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <span className="badge badge-navy mb-3">مدونة Europmat</span>
+              <h2 className="text-2xl md:text-3xl font-bold text-charcoal">
+                أدلة عملية لتجهيز مشروعك في المغرب
+              </h2>
+              <p className="mt-3 max-w-2xl leading-7 text-gray-600">
+                مقالات عربية تساعدك على اختيار معدات المطاعم، المقاهي، المخابز،
+                السناك، البيتزيريا ومحلات الآيس كريم.
+              </p>
+            </div>
+            <Link href={'/blog' as Route} className="btn-secondary">
+              عرض كل المقالات
+            </Link>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {blogPosts.map((post) => (
+              <article key={post.slug} className="rounded-lg border border-gray-200 p-6">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <span className="text-4xl" aria-hidden>
+                    {post.heroIcon}
+                  </span>
+                  <span className="rounded-full bg-beige-warm px-3 py-1 text-xs font-semibold text-charcoal">
+                    {post.category}
+                  </span>
+                </div>
+                <h3 className="mb-3 text-lg font-bold leading-8 text-charcoal">
+                  <Link href={`/blog/${post.slug}` as Route}>{post.title}</Link>
+                </h3>
+                <p className="mb-5 text-sm leading-7 text-gray-600">{post.excerpt}</p>
+                <Link href={`/blog/${post.slug}` as Route} className="text-sm font-bold text-navy-main">
+                  قراءة المقال
+                </Link>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
     </>
   );
 }

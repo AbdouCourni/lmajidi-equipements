@@ -1,6 +1,7 @@
 // src/app/sitemap.ts
 import { getProducts } from '../../lib/firebase/products';
 import { getAllCategories } from '../../lib/firebase/categories';
+import { getBlogPosts } from '../../data/blog-posts';
 
 export default async function sitemap() {
   const baseUrl = 'https://europmat.com';
@@ -17,6 +18,7 @@ export default async function sitemap() {
     { url: baseUrl, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 1 },
     { url: `${baseUrl}/produits`, lastModified: new Date(), changeFrequency: 'daily' as const, priority: 0.9 },
     { url: `${baseUrl}/categories`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
+    { url: `${baseUrl}/blog`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
     { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: 'monthly' as const, priority: 0.5 },
   ];
 
@@ -34,5 +36,12 @@ export default async function sitemap() {
     priority: 0.8,
   }));
 
-  return [...staticPages, ...productPages, ...categoryPages];
+  const blogPages = getBlogPosts().map((post) => ({
+    url: `${baseUrl}/blog/${post.slug}`,
+    lastModified: new Date(post.updatedAt),
+    changeFrequency: 'monthly' as const,
+    priority: 0.75,
+  }));
+
+  return [...staticPages, ...productPages, ...categoryPages, ...blogPages];
 }

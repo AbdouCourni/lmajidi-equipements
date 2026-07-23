@@ -266,7 +266,7 @@ Merci.`
             <div className="flex flex-col sm:flex-row gap-4">
 
               <a
-                href={`https://wa.me/212659783940?text=${whatsappMessage}`}
+                href={`https://wa.me/212726850011?text=${whatsappMessage}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-primary text-center"                        >

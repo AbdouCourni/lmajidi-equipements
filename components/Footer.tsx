@@ -23,6 +23,7 @@ import {
 const quickLinks: { href: Route; label: string }[] = [
   { href: '/produits' as Route, label: 'Tous les produits' },
   { href: '/categories' as Route, label: 'Catégories' },
+  { href: '/blog' as Route, label: 'Blog' },
   { href: '/about' as Route, label: 'À propos' },
   { href: '/contact' as Route, label: 'Contact' },
 ];

@@ -15,9 +15,10 @@ const navItems: {
   href: Route;
   label: string;
 }[] = [
-    { href: '/', label: 'Accueil' },
+    { href: '/' as Route, label: 'Accueil' },
     { href: '/categories' as Route, label: 'Catégories' },
     { href: '/produits' as Route, label: 'Produits' },
+    { href: '/blog' as Route, label: 'Blog' },
     { href: '/contact' as Route, label: 'Contact' },
   ];
 
@@ -91,7 +92,7 @@ export default function Header() {
 
             {/* WHATSAPP */}
             <a
-              href="https://wa.me/212659783940"
+              href="https://wa.me/212726850011"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden md:flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition"

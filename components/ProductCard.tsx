@@ -211,7 +211,7 @@ const primaryImage = product.isExternalSrc && product.imageExternalLinks?.length
 
           {/* WHATSAPP */}
           <a
-            href={`https://wa.me/212659783940?text=${formatWhatsAppMessage()}`}
+            href={`https://wa.me/212726850011?text=${formatWhatsAppMessage()}`}
             target="_blank"
             rel="noopener noreferrer"
             className="bg-green-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-green-600 transition flex items-center justify-center gap-2"
