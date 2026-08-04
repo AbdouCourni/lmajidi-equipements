@@ -4,6 +4,8 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase/config';
 import { getProductImages } from '../types/product';
 
 
@@ -17,6 +19,7 @@ import {
 } from '../types/product';
 
 import WhatsAppIcon from './WhatsAppIcon';
+import { useEffect, useState } from 'react';
 
 interface ProductCardProps {
   product: Product;
@@ -35,6 +38,22 @@ export default function ProductCard({
   const stockStatus =
     getProductStockStatus(product);
 
+    const [whatsappNumber, setWhatsappNumber] = useState('212625652015');
+
+useEffect(() => {
+  const fetchSettings = async () => {
+    try {
+      const docRef = doc(db, 'settings', 'contact');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setWhatsappNumber(docSnap.data().whatsappNumber || '212625652015');
+      }
+    } catch (error) {
+      console.error('Error fetching WhatsApp number:', error);
+    }
+  };
+  fetchSettings();
+}, []);
   /* =========================================================
      PRIMARY IMAGE
   ========================================================= */
@@ -211,7 +230,7 @@ const primaryImage = product.isExternalSrc && product.imageExternalLinks?.length
 
           {/* WHATSAPP */}
           <a
-            href={`https://wa.me/212726850011?text=${formatWhatsAppMessage()}`}
+            href={`https://wa.me/${whatsappNumber}?text=${formatWhatsAppMessage()}`}
             target="_blank"
             rel="noopener noreferrer"
             className="bg-green-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-green-600 transition flex items-center justify-center gap-2"

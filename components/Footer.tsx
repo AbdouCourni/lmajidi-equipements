@@ -7,7 +7,7 @@ import WhatsAppIcon from './WhatsAppIcon';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase/config';
 import type { Category } from '../types/category';
 import {
@@ -19,6 +19,22 @@ import {
   CheckCircle,
   AlertCircle
 } from 'lucide-react';
+
+interface ContactSettings {
+  whatsappNumber: string;
+  phone1: string;
+  phone2: string;
+  email: string;
+  address: string;
+  catalogueUrl: string;
+  catalogueName: string;
+  openingHours: {
+    'Lun-Ven': string;
+    'Sam': string;
+    'Dim': string;
+  };
+}
+
 
 const quickLinks: { href: Route; label: string }[] = [
   { href: '/produits' as Route, label: 'Tous les produits' },
@@ -34,6 +50,16 @@ export default function Footer() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
+  const [contactSettings, setContactSettings] = useState<ContactSettings>({
+  whatsappNumber: '212625652015',
+  phone1: '0625652015',
+  phone2: '0661767453',
+  email: 'contact@europmat.ma',
+  address: 'Hay Arrid, à côté de Ecole Al Mada, Nador, Maroc',
+  catalogueUrl: '',
+  catalogueName: 'Catalogue',
+  openingHours: { 'Lun-Ven': '9h00 - 19h00', 'Sam': '10h00 - 16h00', 'Dim': 'Fermé' },
+});
 
   // Fetch main categories
   useEffect(() => {
@@ -55,6 +81,21 @@ export default function Footer() {
     };
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+  const fetchSettings = async () => {
+    try {
+      const docRef = doc(db, 'settings', 'contact');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setContactSettings(prev => ({ ...prev, ...docSnap.data() }));
+      }
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+    }
+  };
+  fetchSettings();
+}, []);
 
   // Handle newsletter subscription
   const handleSubscribe = async (e: React.FormEvent) => {
@@ -128,7 +169,7 @@ export default function Footer() {
             </p>
             <div className="flex gap-3">
               <a
-                href="https://wa.me/212625652015"
+               href={`https://wa.me/${contactSettings.whatsappNumber}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-green-600/20 text-green-400 px-3 py-2 rounded-lg text-sm hover:bg-green-600 hover:text-white transition-all duration-300"
@@ -136,13 +177,13 @@ export default function Footer() {
                 <WhatsAppIcon className="w-5 h-5 text-green-500" />
                 <span>WhatsApp</span>
               </a>
-              {/* <a
-                href="mailto:contact@europmat.ma"
+              <a
+                href={`mailto:${contactSettings.email}`}
                 className="flex items-center gap-2 bg-navy-main/20 text-navy-accent px-3 py-2 rounded-lg text-sm hover:bg-navy-main hover:text-white transition-all duration-300"
               >
                 <Mail size={16} />
                 <span>Email</span>
-              </a> */}
+              </a>
             </div>
           </div>
 
@@ -197,41 +238,41 @@ export default function Footer() {
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-3 text-steel-dark">
                 <MapPin size={18} className="text-navy-accent flex-shrink-0 mt-0.5" />
-                <span>Hay Arrid, à côté de Ecole Al Mada, Nador, Maroc</span>
+                <span>{contactSettings.address}</span>
               </li>
               <li>
                 <a
-                  href="tel:+212625652015"
+                  href={`tel:+${contactSettings.phone1}`} 
                   className="flex items-center gap-3 text-steel-dark hover:text-beige-300 transition-colors"
                 >
                   <Phone size={18} className="text-navy-accent" />
-                  <span>06 25 65 20 15</span>
+                  <span>{contactSettings.phone1}</span>
                 </a>
               </li>
               <li>
                 <a
-                  href="tel:+212661767453"
+                  href={`tel:+${contactSettings.phone2}`}
                   className="flex items-center gap-3 text-steel-dark hover:text-beige-300 transition-colors"
                 >
                   <Phone size={18} className="text-navy-accent" />
-                  <span>06 61 76 74 53</span>
+                  <span>{contactSettings.phone2}</span>
                 </a>
               </li>
               <li>
                 <a
-                  href="mailto:contact@europmat.ma"
+                  href={`mailto:${contactSettings.email}`}
                   className="flex items-center gap-3 text-steel-dark hover:text-beige-300 transition-colors"
                 >
                   <Mail size={18} className="text-navy-accent" />
-                  <span>contact@europmat.ma</span>
+                  <span>{contactSettings.email}</span>
                 </a>
               </li>
               <li className="flex items-start gap-3 text-steel-dark">
                 <Clock size={18} className="text-navy-accent flex-shrink-0 mt-0.5" />
                 <div>
-                  <div>Lun-Ven: 9h00 - 19h00</div>
-                  <div>Sam: 10h00 - 16h00</div>
-                  <div>Dim: Fermé</div>
+                  <div> Lun-Ven: {contactSettings.openingHours['Lun-Ven']}</div>
+                  <div> Sam: {contactSettings.openingHours['Sam']}</div>
+                  <div> Dim: {contactSettings.openingHours['Dim']}</div>
                 </div>
               </li>
             </ul>

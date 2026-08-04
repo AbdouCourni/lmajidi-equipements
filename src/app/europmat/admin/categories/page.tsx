@@ -170,7 +170,7 @@ export default function CategoriesPage() {
         </div>
 
         <Link
-          href= {"/europmat/admin/categories/create" as Route}
+          href={"/europmat/admin/categories/create" as Route}
           className="btn-primary"
         >
           + Create Category
@@ -192,227 +192,226 @@ export default function CategoriesPage() {
       {!loading &&
         categories.length === 0 && (
 
-        <div className="card-dashboard p-10 text-center">
+          <div className="card-dashboard p-10 text-center">
 
-          <div className="text-5xl mb-4">
-            📂
+            <div className="text-5xl mb-4">
+              📂
+            </div>
+
+            <h2 className="text-xl font-semibold mb-2">
+              No categories found
+            </h2>
+
+            <p className="text-gray-500 mb-6">
+              Create your first category
+            </p>
+
+            <Link
+              href={"/europmat/admin/categories/create" as Route}
+              className="btn-primary"
+            >
+              Create Category
+            </Link>
+
           </div>
-
-          <h2 className="text-xl font-semibold mb-2">
-            No categories found
-          </h2>
-
-          <p className="text-gray-500 mb-6">
-            Create your first category
-          </p>
-
-          <Link
-            href={"/europmat/admin/categories/create" as Route}
-            className="btn-primary"
-          >
-            Create Category
-          </Link>
-
-        </div>
-      )}
+        )}
 
       {/* TABLE */}
       {!loading &&
         categories.length > 0 && (
 
-        <div className="card-dashboard overflow-hidden">
+          <div className="card-dashboard overflow-hidden">
 
-          <div className="overflow-x-auto">
+            <div className="overflow-x-auto">
 
-            <table className="w-full">
+              <table className="w-full">
 
-              <thead className="bg-gray-50 border-b">
+                <thead className="bg-gray-50 border-b">
 
-                <tr>
+                  <tr>
 
-                  <th className="text-left p-4 font-semibold">
-                    Image
-                  </th>
+                    <th className="text-left p-4 font-semibold">
+                      Image
+                    </th>
 
-                  <th className="text-left p-4 font-semibold">
-                    Name
-                  </th>
+                    <th className="text-left p-4 font-semibold">
+                      Name
+                    </th>
 
-                  <th className="text-left p-4 font-semibold">
-                    Slug
-                  </th>
+                    <th className="text-left p-4 font-semibold">
+                      Slug
+                    </th>
 
-                  <th className="text-left p-4 font-semibold">
-                    Type
-                  </th>
+                    <th className="text-left p-4 font-semibold">
+                      Type
+                    </th>
 
-                  <th className="text-left p-4 font-semibold">
-                    Parent
-                  </th>
+                    <th className="text-left p-4 font-semibold">
+                      Parent
+                    </th>
 
-                  <th className="text-left p-4 font-semibold">
-                    Created
-                  </th>
+                    <th className="text-left p-4 font-semibold">
+                      Created
+                    </th>
 
-                  <th className="text-right p-4 font-semibold">
-                    Actions
-                  </th>
+                    <th className="text-right p-4 font-semibold">
+                      Actions
+                    </th>
 
-                </tr>
+                  </tr>
 
-              </thead>
+                </thead>
 
-              <tbody>
+                <tbody>
 
-                {categories.map(category => (
+                  {categories.map(category => (
 
-                  <tr
-                    key={category.id}
-                    className="border-b hover:bg-gray-50 transition"
-                  >
+                    <tr
+                      key={category.id}
+                      className="border-b hover:bg-gray-50 transition"
+                    >
 
-                    {/* IMAGE */}
-                    <td className="p-4">
+                      {/* IMAGE */}
+                      <td className="p-4">
 
-                      <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-gray-100">
+                        <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-gray-100">
 
-                        {category.image ? (
+                          {category.image ? (
 
-                          <Image
-                            src={category.image}
-                            alt={category.name}
-                            fill
-                            className="object-cover"
-                          />
+                            <Image
+                              src={category.image}
+                              alt={category.name}
+                              fill
+                              className="object-cover"
+                            />
 
-                        ) : (
+                          ) : (
 
-                          <div className="flex items-center justify-center h-full text-2xl">
+                            <div className="flex items-center justify-center h-full text-2xl">
 
-                            📂
+                              📂
 
-                          </div>
+                            </div>
+                          )}
+
+                        </div>
+
+                      </td>
+
+                      {/* NAME */}
+                      <td className="p-4">
+
+                        <div>
+
+                          <h3 className="font-semibold text-charcoal">
+                            {category.name}
+                          </h3>
+
+                          {category.description && (
+
+                            <p className="text-sm text-gray-500 line-clamp-1 mt-1">
+                              {category.description}
+                            </p>
+                          )}
+
+                        </div>
+
+                      </td>
+
+                      {/* SLUG */}
+                      <td className="p-4">
+
+                        <span className="text-sm bg-gray-100 px-3 py-1 rounded-full">
+
+                          {category.slug}
+
+                        </span>
+
+                      </td>
+
+                      {/* LEVEL */}
+                      <td className="p-4">
+
+                        <span
+                          className={`text-sm px-3 py-1 rounded-full ${category.level ===
+                              'main'
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'bg-orange-100 text-orange-700'
+                            }`}
+                        >
+
+                          {category.level ===
+                            'main'
+                            ? 'Main'
+                            : 'Sub'}
+
+                        </span>
+
+                      </td>
+
+                      {/* PARENT */}
+                      <td className="p-4 text-sm text-gray-600">
+
+                        {getParentCategoryName(
+                          category.parentId
                         )}
 
-                      </div>
+                      </td>
 
-                    </td>
+                      {/* DATE */}
+                      <td className="p-4 text-sm text-gray-500">
 
-                    {/* NAME */}
-                    <td className="p-4">
-
-                      <div>
-
-                        <h3 className="font-semibold text-charcoal">
-                          {category.name}
-                        </h3>
-
-                        {category.description && (
-
-                          <p className="text-sm text-gray-500 line-clamp-1 mt-1">
-                            {category.description}
-                          </p>
-                        )}
-
-                      </div>
-
-                    </td>
-
-                    {/* SLUG */}
-                    <td className="p-4">
-
-                      <span className="text-sm bg-gray-100 px-3 py-1 rounded-full">
-
-                        {category.slug}
-
-                      </span>
-
-                    </td>
-
-                    {/* LEVEL */}
-                    <td className="p-4">
-
-                      <span
-                        className={`text-sm px-3 py-1 rounded-full ${
-                          category.level ===
-                          'main'
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'bg-orange-100 text-orange-700'
-                        }`}
-                      >
-
-                        {category.level ===
-                        'main'
-                          ? 'Main'
-                          : 'Sub'}
-
-                      </span>
-
-                    </td>
-
-                    {/* PARENT */}
-                    <td className="p-4 text-sm text-gray-600">
-
-                      {getParentCategoryName(
-                        category.parentId
-                      )}
-
-                    </td>
-
-                    {/* DATE */}
-                    <td className="p-4 text-sm text-gray-500">
-
-                      {category.createdAt
-                        ? new Date(
+                        {category.createdAt
+                          ? new Date(
                             category.createdAt
                           ).toLocaleDateString(
                             'fr-FR'
                           )
-                        : '-'}
+                          : '-'}
 
-                    </td>
+                      </td>
 
-                    {/* ACTIONS */}
-                    <td className="p-4">
+                      {/* ACTIONS */}
+                      <td className="p-4">
 
-                      <div className="flex items-center justify-end gap-3">
+                        <div className="flex items-center justify-end gap-3">
 
-                        {/* EDIT */}
-                        <Link
-                          href={`/europmat/admin/categories/edit/${category.id}` as Route}
-                          className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition text-sm"
-                        >
-                          Edit
-                        </Link>
+                          {/* EDIT */}
+                          <Link
+                            href={`/europmat/admin/categories/edit/${category.id}` as Route}
+                            className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition text-sm"
+                          >
+                            Edit
+                          </Link>
 
-                        {/* DELETE */}
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleDelete(
-                              category.id
-                            )
-                          }
-                          className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white transition text-sm"
-                        >
-                          Delete
-                        </button>
+                          {/* DELETE */}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleDelete(
+                                category.id
+                              )
+                            }
+                            className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white transition text-sm"
+                          >
+                            Delete
+                          </button>
 
-                      </div>
+                        </div>
 
-                    </td>
+                      </td>
 
-                  </tr>
-                ))}
+                    </tr>
+                  ))}
 
-              </tbody>
+                </tbody>
 
-            </table>
+              </table>
+
+            </div>
 
           </div>
-
-        </div>
-      )}
+        )}
 
     </div>
   );

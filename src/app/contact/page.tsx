@@ -1,8 +1,10 @@
 // src/app/contact/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { MapPin, Phone, Mail, MessageCircle, Clock, Send, Building, Award, Headphones } from 'lucide-react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../../lib/firebase/config';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -14,6 +16,28 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [contactSettings, setContactSettings] = useState({
+  whatsappNumber: '212625652015',
+  phone1: '0625652015',
+  phone2: '0661767453',
+  email: 'contact@europmat.ma',
+  address: 'Hay Arrid, à côté de Ecole Al Mada, Nador, Maroc',
+  openingHours: { 'Lun-Ven': '9h00 - 19h00', 'Sam': '10h00 - 16h00', 'Dim': 'Fermé' },
+});
+useEffect(() => {
+  const fetchSettings = async () => {
+    try {
+      const docRef = doc(db, 'settings', 'contact');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setContactSettings(prev => ({ ...prev, ...docSnap.data() }));
+      }
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+    }
+  };
+  fetchSettings();
+}, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +48,7 @@ export default function ContactPage() {
     
     // Open WhatsApp with professional message
     const whatsappMessage = `*Nouvelle demande de contact*%0A%0A*Nom:* ${formData.name}%0A*Email:* ${formData.email}%0A*Téléphone:* ${formData.phone}%0A*Sujet:* ${formData.subject}%0A%0A*Message:*%0A${formData.message}`;
-    window.open(`https://wa.me/212625652015?text=${whatsappMessage}`, '_blank');
+    window.open(`https://wa.me/${contactSettings.whatsappNumber}?text=${whatsappMessage}`, '_blank');
     
     setIsSubmitting(false);
     setSubmitted(true);
@@ -69,11 +93,11 @@ export default function ContactPage() {
                   <p className="text-sm text-gray-500">Support technique & commercial</p>
                 </div>
               </div>
-              <a href="tel:+212625652015" className="text-lg font-semibold text-gray-900 hover:text-blue-600 block">
-                06 25 65 20 15
+              <a href={`tel:+${contactSettings.phone1}`} className="text-lg font-semibold text-gray-900 hover:text-blue-600 block">
+                {contactSettings.phone1}
               </a>
-              <a href="tel:+212661767453" className="text-lg font-semibold text-gray-900 hover:text-blue-600 block mt-1">
-                06 61 76 74 53
+              <a href={`tel:+${contactSettings.phone2}`} className="text-lg font-semibold text-gray-900 hover:text-blue-600 block mt-1">
+                {contactSettings.phone2}
               </a>
             </div>
 
@@ -87,8 +111,8 @@ export default function ContactPage() {
                   <p className="text-sm text-gray-500">Réponse sous 24h</p>
                 </div>
               </div>
-              <a href="https://wa.me/212625652015" target="_blank" className="text-lg font-semibold text-gray-900 hover:text-green-600 block">
-                06 25 65 20 15
+              <a href={`https://wa.me/${contactSettings.whatsappNumber}`} target="_blank" className="text-lg font-semibold text-gray-900 hover:text-green-600 block">
+                {contactSettings.whatsappNumber}
               </a>
             </div>
 
@@ -102,8 +126,8 @@ export default function ContactPage() {
                   <p className="text-sm text-gray-500">Devis & informations</p>
                 </div>
               </div>
-              <a href="mailto:contact@europmat.ma" className="text-lg font-semibold text-gray-900 hover:text-purple-600 block">
-                contact@europmat.ma
+              <a href={`mailto:${contactSettings.email}`} className="text-lg font-semibold text-gray-900 hover:text-purple-600 block">
+                {contactSettings.email}
               </a>
             </div>
 
@@ -118,8 +142,7 @@ export default function ContactPage() {
                 </div>
               </div>
               <p className="text-gray-700">
-                Hay Arrid, à côté de Ecole Al Mada<br />
-                Nador, Maroc
+                {contactSettings.address}
               </p>
             </div>
 
@@ -132,15 +155,15 @@ export default function ContactPage() {
               <div className="space-y-2 text-gray-300">
                 <div className="flex justify-between">
                   <span>Lundi - Vendredi</span>
-                  <span>09:00 - 19:00</span>
+                  <span>{contactSettings.openingHours['Lun-Ven']}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Samedi</span>
-                  <span>10:00 - 16:00</span>
+                  <span>{contactSettings.openingHours['Sam']}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Dimanche</span>
-                  <span>Fermé</span>
+                  <span>{contactSettings.openingHours['Dim']}</span>
                 </div>
               </div>
             </div>

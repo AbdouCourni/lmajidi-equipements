@@ -44,10 +44,7 @@
 
       formData.append('file', file);
 
-      formData.append(
-        'upload_preset',
-        'europmat_unsigned'
-      );
+      formData.append('upload_preset', 'europmat_products');
 
       const cloudName =
         process.env

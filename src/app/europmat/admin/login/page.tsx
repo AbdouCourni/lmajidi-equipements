@@ -1,11 +1,12 @@
 // src/app/europmat/admin/login/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../../../../lib/firebase/config';
+import type { Route } from 'next';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -33,15 +34,19 @@ export default function AdminLoginPage() {
         throw new Error('This account does not have admin privileges');
       }
       
-      console.log('✅ Admin verified, redirecting...');
-      router.push('/europmat/admin/dashboard' as any);
-      
+     console.log('✅ Admin verified, redirecting...');
+     await new Promise(resolve => setTimeout(resolve, 300));
+
+router.replace('/europmat/admin/manage' as any);
+      console.log('✅ Redirected to dashboard');
     } catch (err: any) {
       console.error('❌ Login failed:', err);
       
       // Clear any existing session
       if (auth.currentUser) {
+        console.log('Signing out current user due to failed login attempt...');
         await auth.signOut();
+        console.log('✅ Signed out current user');
       }
       
       // User-friendly error messages

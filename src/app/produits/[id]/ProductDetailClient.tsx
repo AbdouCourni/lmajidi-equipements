@@ -17,6 +17,9 @@ import type {
 import ProductCard from '../../../../components/ProductCard';
 import { getPrimaryImage, getProductImages } from '../../../../types/product';
 import WhatsAppIcon from '../../../../components/WhatsAppIcon';
+import { useState, useEffect } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../../../lib/firebase/config';
 
 
 interface ProductDetailClientProps {
@@ -30,6 +33,22 @@ export default function ProductDetailClient({
   relatedProducts,
 }: ProductDetailClientProps) {
 
+  useEffect(() => {
+  const fetchSettings = async () => {
+    try {
+      const docRef = doc(db, 'settings', 'contact');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setWhatsappNumber(docSnap.data().whatsappNumber || '212625652015');
+      }
+    } catch (error) {
+      console.error('Error fetching WhatsApp number:', error);
+    }
+  };
+  fetchSettings();
+}, []);
+
+const [whatsappNumber, setWhatsappNumber] = useState('212625652015');
 
   /* =========================================================
  IMAGES
@@ -266,7 +285,7 @@ Merci.`
             <div className="flex flex-col sm:flex-row gap-4">
 
               <a
-                href={`https://wa.me/212726850011?text=${whatsappMessage}`}
+                href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-primary text-center"                        >
