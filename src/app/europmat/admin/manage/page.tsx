@@ -63,7 +63,7 @@ export default function ManagePage() {
         </div>
 
         <Link
-          href={'/europmat/admin/products/new' as any}  
+          href={'/europmat/admin/products/create' as any}  
           className="btn-primary w-fit"
         >
           + Add Product
