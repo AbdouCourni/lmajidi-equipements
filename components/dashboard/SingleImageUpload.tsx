@@ -59,7 +59,7 @@ export function SingleImageUpload({
 
     formData.append(
       'upload_preset',
-      'europmat_unsigned'
+      'europmat_products'
     );
 
     formData.append(
